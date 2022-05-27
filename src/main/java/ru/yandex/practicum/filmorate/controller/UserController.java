@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.generator.GeneratorUserId;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDate;
+import javax.validation.Valid;
 import java.util.*;
 
 @RestController
@@ -30,7 +30,7 @@ public class UserController {
     }
 
     @PostMapping
-    public User addUser(@RequestBody User user, HttpServletRequest request) throws ValidationException {
+    public User addUser(@Valid @RequestBody User user, HttpServletRequest request) throws ValidationException {
         log.info("Получен запрос к эндпоинту: '{} {}'", request.getMethod(), request.getRequestURI());
         checkValidation(user);
 
@@ -45,7 +45,7 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateUser(@RequestBody User user, HttpServletRequest request) throws ValidationException {
+    public User updateUser(@Valid @RequestBody User user, HttpServletRequest request) throws ValidationException {
         log.info("Получен запрос к эндпоинту: '{} {}'", request.getMethod(), request.getRequestURI());
         checkValidation(user);
 
@@ -59,13 +59,11 @@ public class UserController {
     }
 
     private void checkValidation(User user) throws ValidationException {
-        boolean isWrongEmail = user.getEmail().isBlank() || !user.getEmail().contains("@");
-        boolean isWrongLogin = user.getLogin().isBlank() || user.getLogin().contains(" ");
+        boolean isWrongLogin = user.getLogin().contains(" ");
         boolean isWrongName = user.getName().isBlank();
-        boolean isWrongBirthday = user.getBirthday().isAfter(LocalDate.now());
 
-        if (isWrongEmail || isWrongLogin || isWrongBirthday) {
-            log.info("Запрос не прошел User-валидацию");
+        if (isWrongLogin) {
+            log.info("Логин содержит пробелы");
             throw new ValidationException("Пользователь не соответствует критериям");
         }
 

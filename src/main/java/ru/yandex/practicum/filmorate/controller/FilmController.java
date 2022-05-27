@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.generator.GeneratorFilmId;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,7 +33,7 @@ public class FilmController {
     }
 
     @PostMapping
-    public Film addFilm(@RequestBody Film film, HttpServletRequest request) throws ValidationException {
+    public Film addFilm(@Valid @RequestBody Film film, HttpServletRequest request) throws ValidationException {
         log.info("Получен запрос к эндпоинту: '{} {}'", request.getMethod(), request.getRequestURI());
         checkValidation(film);
 
@@ -47,7 +48,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film updateFilm(@RequestBody Film film, HttpServletRequest request) throws ValidationException {
+    public Film updateFilm(@Valid @RequestBody Film film, HttpServletRequest request) throws ValidationException {
         log.info("Получен запрос к эндпоинту: '{} {}'", request.getMethod(), request.getRequestURI());
         checkValidation(film);
 
@@ -61,13 +62,10 @@ public class FilmController {
     }
 
     private void checkValidation(Film film) throws ValidationException {
-        boolean isWrongName = film.getName().isBlank();
-        boolean isWrongDescription = film.getDescription().length() > 200;
         boolean isWrongReleaseDate = film.getReleaseDate().isBefore(validateDate);
-        boolean isWrongDuration = film.getDuration() < 0;
 
-        if (isWrongName || isWrongDuration || isWrongDescription || isWrongReleaseDate) {
-            log.info("Запрос не прошел Film-валидацию");
+        if (isWrongReleaseDate) {
+            log.info("Дата релиза раньше 1895 года");
             throw new ValidationException("Фильм не соответствует критериям");
         }
     }
