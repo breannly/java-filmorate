@@ -32,7 +32,7 @@ public class UserController {
     @PostMapping
     public User addUser(@Valid @RequestBody User user, HttpServletRequest request) throws ValidationException {
         log.info("Получен запрос к эндпоинту: '{} {}'", request.getMethod(), request.getRequestURI());
-        checkValidation(user);
+        validate(user);
 
         users.put(createUser(user), user);
         return user;
@@ -47,7 +47,7 @@ public class UserController {
     @PutMapping
     public User updateUser(@Valid @RequestBody User user, HttpServletRequest request) throws ValidationException {
         log.info("Получен запрос к эндпоинту: '{} {}'", request.getMethod(), request.getRequestURI());
-        checkValidation(user);
+        validate(user);
 
         if (!users.containsKey(user.getId())) {
             log.info("Неверно указан id");
@@ -58,7 +58,7 @@ public class UserController {
         return user;
     }
 
-    private void checkValidation(User user) throws ValidationException {
+    private void validate(User user) throws ValidationException {
         boolean isWrongLogin = user.getLogin().contains(" ");
         boolean isWrongName = user.getName().isBlank();
 

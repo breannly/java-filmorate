@@ -35,7 +35,7 @@ public class FilmController {
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film, HttpServletRequest request) throws ValidationException {
         log.info("Получен запрос к эндпоинту: '{} {}'", request.getMethod(), request.getRequestURI());
-        checkValidation(film);
+        validate(film);
 
         films.put(createFilm(film), film);
         return film;
@@ -50,7 +50,7 @@ public class FilmController {
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film, HttpServletRequest request) throws ValidationException {
         log.info("Получен запрос к эндпоинту: '{} {}'", request.getMethod(), request.getRequestURI());
-        checkValidation(film);
+        validate(film);
 
         if (!films.containsKey(film.getId())) {
             log.info("Неверно указан id");
@@ -61,7 +61,7 @@ public class FilmController {
         return film;
     }
 
-    private void checkValidation(Film film) throws ValidationException {
+    private void validate(Film film) throws ValidationException {
         boolean isWrongReleaseDate = film.getReleaseDate().isBefore(validateDate);
 
         if (isWrongReleaseDate) {
