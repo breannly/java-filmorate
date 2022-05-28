@@ -13,49 +13,36 @@ import java.util.*;
 @RestController
 @RequestMapping("/users")
 @Slf4j
-public class UserController {
-    private final Map<Long, User> users;
+public class UserController extends Controller<User> {
     private final GeneratorUserId generatorId;
 
     public UserController() {
-        users = new HashMap<>();
         generatorId = new GeneratorUserId();
     }
 
     @GetMapping
-    public Collection<User> getUsers(HttpServletRequest request) {
-        log.info("Получен запрос к эндпоинту: '{} {}'", request.getMethod(), request.getRequestURI());
-
-        return users.values();
+    public Collection<User> findAll() {
+        return super.findAll();
     }
 
     @PostMapping
-    public User addUser(@Valid @RequestBody User user, HttpServletRequest request) throws ValidationException {
-        log.info("Получен запрос к эндпоинту: '{} {}'", request.getMethod(), request.getRequestURI());
+    public User add(@Valid @RequestBody User user) throws ValidationException {
         validate(user);
 
-        users.put(createUser(user), user);
-        return user;
+        return super.add(createUser(user));
     }
 
-    private Long createUser(User user) {
+    private User createUser(User user) {
         user.setId(generatorId.generate());
 
-        return user.getId();
+        return user;
     }
 
     @PutMapping
-    public User updateUser(@Valid @RequestBody User user, HttpServletRequest request) throws ValidationException {
-        log.info("Получен запрос к эндпоинту: '{} {}'", request.getMethod(), request.getRequestURI());
+    public User update(@Valid @RequestBody User user) throws ValidationException {
         validate(user);
 
-        if (!users.containsKey(user.getId())) {
-            log.info("Неверно указан id");
-            throw new ValidationException("Пользователя с таким id нет");
-        }
-        users.put(user.getId(), user);
-
-        return user;
+        return super.update(user);
     }
 
     private void validate(User user) throws ValidationException {

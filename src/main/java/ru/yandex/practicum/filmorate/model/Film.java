@@ -1,20 +1,23 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Data;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
 
-@Data
-public class Film {
-    private Long id;
+import static ru.yandex.practicum.filmorate.config.Config.MAX_SIZE_DESCRIPTION;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+public class Film extends Entity {
     @NotBlank
     private String name;
 
-    @Size(min = 0, max = 200, message = "Описание превышает 200 символов")
+    @Size(max = MAX_SIZE_DESCRIPTION, message = "Описание превышает" + MAX_SIZE_DESCRIPTION + "символов")
     private String description;
 
     private LocalDate releaseDate;

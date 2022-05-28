@@ -8,57 +8,43 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+
+import static ru.yandex.practicum.filmorate.config.Config.validateDate;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
-public class FilmController {
-    private final Map<Long, Film> films;
+public class FilmController extends Controller<Film> {
     private final GeneratorFilmId generatorId;
-    private static final LocalDate validateDate = LocalDate.of(1895, 12, 28);
 
     public FilmController() {
-        films = new HashMap<>();
         generatorId = new GeneratorFilmId();
     }
 
     @GetMapping
-    public Collection<Film> getFilms(HttpServletRequest request) {
-        log.info("Получен запрос к эндпоинту: '{} {}'", request.getMethod(), request.getRequestURI());
-        return films.values();
+    public Collection<Film> findAll() {
+        return super.findAll();
     }
 
     @PostMapping
-    public Film addFilm(@Valid @RequestBody Film film, HttpServletRequest request) throws ValidationException {
-        log.info("Получен запрос к эндпоинту: '{} {}'", request.getMethod(), request.getRequestURI());
+    public Film add(@Valid @RequestBody Film film) throws ValidationException {
         validate(film);
 
-        films.put(createFilm(film), film);
-        return film;
+        return super.add(createFilm(film));
     }
 
-    private Long createFilm(Film film) {
+    private Film createFilm(Film film) {
         film.setId(generatorId.generate());
 
-        return film.getId();
+        return film;
     }
 
     @PutMapping
-    public Film updateFilm(@Valid @RequestBody Film film, HttpServletRequest request) throws ValidationException {
-        log.info("Получен запрос к эндпоинту: '{} {}'", request.getMethod(), request.getRequestURI());
+    public Film update(@Valid @RequestBody Film film) throws ValidationException {
         validate(film);
 
-        if (!films.containsKey(film.getId())) {
-            log.info("Неверно указан id");
-            throw new ValidationException("Пользователя с таким id нет");
-        }
-        films.put(film.getId(), film);
-
-        return film;
+        return super.update(film);
     }
 
     private void validate(Film film) throws ValidationException {
