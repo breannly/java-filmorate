@@ -15,19 +15,6 @@ class UserControllerTest {
     }
 
     @Test
-    void shouldThrowValidationExceptionWhenLoginHasWhitespace() {
-        String wrongLogin = "test test";
-        User user = getDefaultUser();
-        user.setLogin(wrongLogin);
-
-        final ValidationException exception = Assertions.assertThrows(
-                ValidationException.class,
-                () -> controller.add(user)
-        );
-        Assertions.assertEquals("Пользователь не соответствует критериям", exception.getMessage());
-    }
-
-    @Test
     void shouldChangeNameToLoginWhenNameEmpty() throws ValidationException {
         String wrongName = "";
         User user = getDefaultUser();

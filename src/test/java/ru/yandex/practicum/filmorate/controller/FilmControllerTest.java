@@ -24,7 +24,7 @@ class FilmControllerTest {
                 ValidationException.class,
                 () -> {controller.add(film);}
         );
-        Assertions.assertEquals("Фильм не соответствует критериям", exception.getMessage());
+        Assertions.assertEquals("Слишком ранняя дата релиза", exception.getMessage());
     }
 
     private Film getDefaultFilm() {

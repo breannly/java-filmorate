@@ -2,10 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.*;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PastOrPresent;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 
 @Getter
@@ -16,12 +13,12 @@ public class User extends Entity {
     @Email(message = "Email недействительный")
     private String email;
 
-    @NotBlank(message = "Логин пустой")
+    @NotBlank(message = "Логин не должен быть пустым")
+    @Pattern(regexp = "^\\S*$", message = "Логин не может содержать пробелы")
     private String login;
 
-    @NotNull
     private String name;
 
-    @PastOrPresent(message = "Дата рождения в будущем")
+    @PastOrPresent(message = "Дата рождения не может быть в будущем")
     private LocalDate birthday;
 }
