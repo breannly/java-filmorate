@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.LocalDate;
+import javax.validation.Valid;
 import java.util.Collection;
 
 @Slf4j
@@ -18,40 +18,22 @@ public class UserController extends AbstractController<User> {
     }
 
     @PostMapping
-    public User add(@RequestBody User user) throws ValidationException {
+    public User add(@Valid @RequestBody User user) throws ValidationException {
         return super.add(user);
     }
 
     @PutMapping
-    public User update(@RequestBody User user) throws ValidationException {
+    public User update(@Valid @RequestBody User user) throws ValidationException {
         return super.update(user);
     }
 
     @Override
-    protected void validate(User user) throws ValidationException {
+    protected void validate(User user) {
         boolean isWrongName = user.getName().isBlank();
-        boolean isWrongBirthday = user.getBirthday().isAfter(LocalDate.now());
-        boolean isWrongLogin = user.getLogin().isBlank() || user.getLogin().contains(" ");
-        boolean isWrongEmail = user.getEmail().isBlank() || !user.getEmail().contains("@");
 
         if (isWrongName) {
             log.info("У пользователя {} user изменено имя на {}", user, user.getLogin());
             user.setName(user.getLogin());
-        }
-
-        if (isWrongBirthday) {
-            log.warn("Дата рождения не может быть в будущем");
-            throw new ValidationException("День рождения в будущем");
-        }
-
-        if (isWrongLogin) {
-            log.warn("Неподходящий логин");
-            throw new ValidationException("Неподходящий логин");
-        }
-
-        if (isWrongEmail) {
-            log.warn("Недействующий email");
-            throw new ValidationException("Недействующий email");
         }
     }
 }

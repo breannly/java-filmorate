@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.generator.IdGenerator;
 import ru.yandex.practicum.filmorate.model.IdEntity;
 
+import javax.validation.Valid;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +27,7 @@ public abstract class AbstractController<T extends IdEntity> {
         return storage.values();
     }
 
-    public T add(@RequestBody T t) throws ValidationException {
+    public T add(@Valid @RequestBody T t) throws ValidationException {
         validate(t);
 
         t.setId(generator.generate());
@@ -36,7 +37,7 @@ public abstract class AbstractController<T extends IdEntity> {
         return t;
     }
 
-    public T update(@RequestBody T t) throws ValidationException {
+    public T update(@Valid @RequestBody T t) throws ValidationException {
         validate(t);
 
         if (!storage.containsKey(t.getId())) {
