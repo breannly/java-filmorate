@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.generator;
 
-public class IdGenerator {
+abstract class IdGenerator {
     private Long id;
 
     public IdGenerator() {
