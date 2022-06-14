@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
+import java.util.Map;
 
 @Component
 public interface UserStorage {
@@ -12,4 +13,6 @@ public interface UserStorage {
     public User add(User user);
 
     public User update(User user);
+
+    public Map<Long, User> getUsers();
 }
