@@ -5,8 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -16,30 +14,28 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final UserStorage inMemoryUserStorage;
     private final UserService service;
 
     @Autowired
-    public UserController(InMemoryUserStorage inMemoryUserStorage, UserService service) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
+    public UserController(UserService service) {
         this.service = service;
     }
 
     @GetMapping
     public Collection<User> findAll() {
-        return inMemoryUserStorage.findAll();
+        return service.findAll();
     }
 
     @PostMapping
     public User add(@Valid @RequestBody User user) {
         validate(user);
-        return inMemoryUserStorage.add(user);
+        return service.add(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
         validate(user);
-        return inMemoryUserStorage.update(user);
+        return service.update(user);
     }
 
     private void validate(User user) {
@@ -72,7 +68,7 @@ public class UserController {
     }
 
     @GetMapping("{id}/friends/common/{otherId}")
-    public List<User> getFriends(@PathVariable Long id, @PathVariable Long otherId) {
+    public List<User> getMutualFriends(@PathVariable Long id, @PathVariable Long otherId) {
         return service.getMutualFriends(id, otherId);
     }
 }

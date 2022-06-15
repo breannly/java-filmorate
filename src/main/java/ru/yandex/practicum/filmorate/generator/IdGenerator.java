@@ -1,6 +1,11 @@
 package ru.yandex.practicum.filmorate.generator;
 
-abstract class IdGenerator {
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+@Component
+@Scope("prototype")
+public class IdGenerator {
     private Long id;
 
     public IdGenerator() {

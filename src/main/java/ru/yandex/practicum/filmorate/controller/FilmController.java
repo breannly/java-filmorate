@@ -6,8 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -19,30 +17,28 @@ import static ru.yandex.practicum.filmorate.config.Config.validateDate;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private final FilmStorage inMemoryFilmStorage;
     private final FilmService service;
 
     @Autowired
-    public FilmController(InMemoryFilmStorage inMemoryFilmStorage, FilmService service) {
-        this.inMemoryFilmStorage = inMemoryFilmStorage;
+    public FilmController(FilmService service) {
         this.service = service;
     }
 
     @GetMapping
     public Collection<Film> findAll() {
-        return inMemoryFilmStorage.findAll();
+        return service.findAll();
     }
 
     @PostMapping
     public Film add(@Valid @RequestBody Film film) {
         validate(film);
-        return inMemoryFilmStorage.add(film);
+        return service.add(film);
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
         validate(film);
-        return inMemoryFilmStorage.update(film);
+        return service.update(film);
     }
 
     private void validate(Film film) {

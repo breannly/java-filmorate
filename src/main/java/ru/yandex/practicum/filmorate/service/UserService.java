@@ -5,10 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,8 +18,20 @@ public class UserService {
     private final UserStorage storage;
 
     @Autowired
-    public UserService(InMemoryUserStorage storage) {
+    public UserService(UserStorage storage) {
         this.storage = storage;
+    }
+
+    public Collection<User> findAll() {
+        return storage.findAll();
+    }
+
+    public User add(User user) {
+        return storage.add(user);
+    }
+
+    public User update(User user) {
+        return storage.update(user);
     }
 
     public void addFriend(Long id, Long friendId) {
@@ -33,7 +45,7 @@ public class UserService {
     public User findUserById(Long id) {
         User user = storage.getUsers().get(id);
         if (user == null) {
-            log.info("Пользователь {} не найден", id);
+            log.warn("Пользователь {} не найден", id);
             throw new ObjectNotFoundException("Вызов несуществующего объекта");
         }
 

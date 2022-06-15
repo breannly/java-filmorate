@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,10 +21,22 @@ public class FilmService {
         this.storage = storage;
     }
 
+    public Collection<Film> findAll() {
+        return storage.findAll();
+    }
+
+    public Film add(Film film) {
+        return storage.add(film);
+    }
+
+    public Film update(Film film) {
+        return storage.update(film);
+    }
+
     public Film findFilmById(Long id) {
         Film film = storage.getFilms().get(id);
         if (film == null) {
-            log.info("Фильм {} не найден", id);
+            log.warn("Фильм {} не найден", id);
             throw new ObjectNotFoundException("Вызов несуществующего объекта");
         }
 

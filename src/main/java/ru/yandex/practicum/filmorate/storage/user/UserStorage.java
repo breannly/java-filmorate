@@ -6,7 +6,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.Collection;
 import java.util.Map;
 
-@Component
 public interface UserStorage {
     public Collection<User> findAll();
 

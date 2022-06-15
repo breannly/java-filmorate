@@ -4,8 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.generator.UserIdGenerator;
+import ru.yandex.practicum.filmorate.generator.IdGenerator;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
@@ -16,10 +15,10 @@ import java.util.Map;
 @Component
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users;
-    private final UserIdGenerator generator;
+    private final IdGenerator generator;
 
     @Autowired
-    public InMemoryUserStorage(UserIdGenerator generator) {
+    public InMemoryUserStorage(IdGenerator generator) {
         users = new HashMap<>();
         this.generator = generator;
     }
