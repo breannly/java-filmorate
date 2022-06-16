@@ -1,9 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -11,9 +9,7 @@ import javax.validation.Valid;
 import java.util.Collection;
 import java.util.List;
 
-import static ru.yandex.practicum.filmorate.config.Config.validateDate;
 
-@Slf4j
 @RestController
 @RequestMapping("/films")
 public class FilmController {
@@ -31,23 +27,12 @@ public class FilmController {
 
     @PostMapping
     public Film add(@Valid @RequestBody Film film) {
-        validate(film);
         return service.add(film);
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        validate(film);
         return service.update(film);
-    }
-
-    private void validate(Film film) {
-        boolean isWrongReleaseDate = film.getReleaseDate().isBefore(validateDate);
-
-        if (isWrongReleaseDate) {
-            log.warn("Слишком раняя дата релиза");
-            throw new ValidationException("Слишком ранняя дата релиза");
-        }
     }
 
     @GetMapping("/{id}")

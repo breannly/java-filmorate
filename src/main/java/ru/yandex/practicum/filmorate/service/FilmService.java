@@ -4,12 +4,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static ru.yandex.practicum.filmorate.config.Config.validateDate;
 
 @Slf4j
 @Service
@@ -26,11 +29,22 @@ public class FilmService {
     }
 
     public Film add(Film film) {
+        validate(film);
         return storage.add(film);
     }
 
     public Film update(Film film) {
+        validate(film);
         return storage.update(film);
+    }
+
+    private void validate(Film film) {
+        boolean isWrongReleaseDate = film.getReleaseDate().isBefore(validateDate);
+
+        if (isWrongReleaseDate) {
+            log.warn("Слишком раняя дата релиза");
+            throw new ValidationException("Слишком ранняя дата релиза");
+        }
     }
 
     public Film findFilmById(Long id) {

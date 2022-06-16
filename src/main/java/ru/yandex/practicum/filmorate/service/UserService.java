@@ -27,11 +27,22 @@ public class UserService {
     }
 
     public User add(User user) {
+        validate(user);
         return storage.add(user);
     }
 
     public User update(User user) {
+        validate(user);
         return storage.update(user);
+    }
+
+    private void validate(User user) {
+        boolean isWrongName = user.getName().isBlank();
+
+        if (isWrongName) {
+            log.info("У пользователя {} user изменено имя на {}", user, user.getLogin());
+            user.setName(user.getLogin());
+        }
     }
 
     public void addFriend(Long id, Long friendId) {
