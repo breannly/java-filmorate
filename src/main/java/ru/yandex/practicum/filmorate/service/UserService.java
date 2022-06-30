@@ -47,7 +47,7 @@ public class UserService {
 
     public void addFriend(Long id, Long friendId) {
         User user = findUserById(id);
-        User userFriend  = findUserById(friendId);
+        User userFriend = findUserById(friendId);
 
         user.getFriends().add(friendId);
         userFriend.getFriends().add(id);
@@ -65,7 +65,7 @@ public class UserService {
 
     public void deleteFriend(Long id, Long friendId) {
         User user = findUserById(id);
-        User userFriend  = findUserById(friendId);
+        User userFriend = findUserById(friendId);
         log.info("Удаление из друзей {} {}", id, friendId);
 
         user.getFriends().remove(friendId);

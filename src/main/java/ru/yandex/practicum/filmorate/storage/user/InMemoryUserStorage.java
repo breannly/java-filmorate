@@ -51,6 +51,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public Map<Long, User> getUsers() {
-        return users;
+        return new HashMap<>(users);
     }
 }
