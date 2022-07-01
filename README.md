@@ -8,14 +8,14 @@ Cоциальная сеть, которая поможет выбрать ки�
 
 ## Модель базы данных
 
-![model](https://sun9-west.userapi.com/sun9-11/s/v1/ig2/I0jjTI58dHLZwkrZdILSMVAKE4NENuwtn4GmDvXTCRtUyt2JGNKL8i59s4KoxoR14X5_6DFKBwhkhbaxjLFGkB00.jpg?size=1325x715&quality=95&type=album)
+![model](https://sun9-east.userapi.com/sun9-73/s/v1/ig2/gVA9mfcdUO9xEr7XAM33SxnblocuPHH0GWBKzDizswNP1KOFVy1POmmiY-p4Ktk_inwLsbW7r-vsrrh_eUJtPoDn.jpg?size=1314x640&quality=96&type=album)
 
 #### Пример запросов:
 
 * Получение всех фильмов
 
 ``` SQL
-SELECT DISTINCT name
+SELECT name
 FROM filmorate_films;
 ```
 
@@ -33,7 +33,7 @@ SELECT name
 FROM filmorate_films AS ff
 JOIN films_likes AS fl ON ff.film_id = fl.film_id
 GROUP BY ff.name
-ORDER BY COUNT(user_id)
+ORDER BY COUNT(user_id) DESC
 LIMIT {N}; -- N - количество фильмов
 ```
 
