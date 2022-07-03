@@ -29,5 +29,8 @@ public class Film extends IdEntity {
     @Positive(message = "Продолжительность фильма должна быть положительной")
     private long duration;
 
+    private final Long rate;
+
     private final Set<Long> likes = new HashSet<>();
+
 }
