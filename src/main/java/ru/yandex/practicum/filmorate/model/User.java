@@ -7,8 +7,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PastOrPresent;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
-import java.util.Set;
-import java.util.TreeSet;
 
 @Getter
 @Setter
@@ -26,6 +24,4 @@ public class User extends IdEntity {
 
     @PastOrPresent(message = "Дата рождения не может быть в будущем")
     private LocalDate birthday;
-
-    private final Set<Long> friends = new TreeSet<>(Long::compareTo);
 }

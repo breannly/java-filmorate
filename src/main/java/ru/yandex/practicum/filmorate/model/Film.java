@@ -7,8 +7,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
 import static ru.yandex.practicum.filmorate.config.Config.MAX_SIZE_DESCRIPTION;
 
@@ -28,9 +26,4 @@ public class Film extends IdEntity {
 
     @Positive(message = "Продолжительность фильма должна быть положительной")
     private long duration;
-
-    private final Long rate;
-
-    private final Set<Long> likes = new HashSet<>();
-
 }
