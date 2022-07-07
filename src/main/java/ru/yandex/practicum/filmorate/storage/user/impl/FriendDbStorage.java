@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.FriendshipStatus;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.entity.User;
 import ru.yandex.practicum.filmorate.storage.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.storage.user.dao.FriendStorageDao;
 
@@ -21,11 +22,13 @@ public class FriendDbStorage implements FriendStorageDao {
 
     @Override
     public void addFriend(Long id, Long friendId) {
-        jdbcTemplate.update(SQL_QUERY_ADD_FRIEND, id, friendId);
-        if (checkStatus(id, friendId)) {
-            jdbcTemplate.update(SQL_QUERY_UPDATE_STATUS, 1, id, friendId);
-            jdbcTemplate.update(SQL_QUERY_UPDATE_STATUS, 1, friendId, id);
-        }
+        if (isUserExists(id) && isUserExists(friendId)) {
+            jdbcTemplate.update(SQL_QUERY_ADD_FRIEND, id, friendId);
+            if (checkStatus(id, friendId)) {
+                jdbcTemplate.update(SQL_QUERY_UPDATE_STATUS, 1, id, friendId);
+                jdbcTemplate.update(SQL_QUERY_UPDATE_STATUS, 1, friendId, id);
+            }
+        } else throw new ObjectNotFoundException("Вызов несуществующего объекта");
     }
 
     private boolean checkStatus(Long userId, Long friendId) {
@@ -35,19 +38,30 @@ public class FriendDbStorage implements FriendStorageDao {
         return statuses.size() == 2;
     }
 
+    private boolean isUserExists(Long userId) {
+        int count = jdbcTemplate.queryForObject(SQL_QUERY_CHECK_USER, Integer.class, userId);
+        return count > 0;
+    }
+
     @Override
     public void deleteFriend(Long id, Long friendId) {
-        jdbcTemplate.update(SQL_QUERY_DELETE_FRIEND, id, friendId);
-        jdbcTemplate.update(SQL_QUERY_UPDATE_STATUS, 2, friendId, id);
+        if (isUserExists(id) && isUserExists(friendId)) {
+            jdbcTemplate.update(SQL_QUERY_DELETE_FRIEND, id, friendId);
+            jdbcTemplate.update(SQL_QUERY_UPDATE_STATUS, 2, friendId, id);
+        } else throw new ObjectNotFoundException("Вызов несуществующего объекта");
     }
 
     @Override
     public List<User> findFriends(Long id) {
-        return jdbcTemplate.query(SQL_QUERY_FIND_FRIENDS, new UserMapper(), id);
+        if (isUserExists(id)) {
+            return jdbcTemplate.query(SQL_QUERY_FIND_FRIENDS, new UserMapper(), id);
+        } else throw new ObjectNotFoundException("Вызов несуществующего объекта");
     }
 
     @Override
     public List<User> findMutualFriends(Long id, Long otherId) {
-        return jdbcTemplate.query(SQL_QUERY_FIND_MUTUAL_FRIENDS, new UserMapper(), id, otherId);
+        if (isUserExists(id) && isUserExists(otherId)) {
+            return jdbcTemplate.query(SQL_QUERY_FIND_MUTUAL_FRIENDS, new UserMapper(), id, otherId);
+        }else throw new ObjectNotFoundException("Вызов несуществующего объекта");
     }
 }
