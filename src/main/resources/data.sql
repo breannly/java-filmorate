@@ -1,12 +1,12 @@
-INSERT INTO GENRES (name, description)
-VALUES ('COMEDY', 'Комедия'),
-       ('DRAMA', 'Драма'),
-       ('CARTOON', 'Мультфильм'),
-       ('THRILLER', 'Триллер'),
-       ('DOCUMENTARY', 'Документальный'),
-       ('ACTION', 'Боевик');
+INSERT INTO GENRES (name)
+VALUES ('Комедия'),
+       ('Драма'),
+       ('Мультфильм'),
+       ('Триллер'),
+       ('Документальный'),
+       ('Боевик');
 
-INSERT INTO RATES (name, description)
+INSERT INTO MPA (name, description)
 VALUES ('G', 'Фильм без возрастных ограничений'),
        ('PG', 'Детям рекомендуется смотреть фильм с родителями'),
        ('PG-13', 'Детям до 13 лет просмотр не желателен'),
