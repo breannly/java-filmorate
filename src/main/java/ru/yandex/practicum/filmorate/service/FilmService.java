@@ -1,13 +1,12 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.entity.Film;
 import ru.yandex.practicum.filmorate.storage.film.dao.FilmStorageDao;
+import ru.yandex.practicum.filmorate.storage.film.dao.LikeStorageDao;
 
 import java.util.List;
 
@@ -15,26 +14,23 @@ import static ru.yandex.practicum.filmorate.config.Config.validateDate;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class FilmService {
-    private final FilmStorageDao storage;
-
-    @Autowired
-    public FilmService(@Qualifier("filmDbStorage") FilmStorageDao storage) {
-        this.storage = storage;
-    }
+    private final FilmStorageDao filmStorage;
+    private final LikeStorageDao likeStorage;
 
     public List<Film> findAll() {
-        return storage.findAll();
+        return filmStorage.findAll();
     }
 
     public Film add(Film film) {
         validate(film);
-        return storage.add(film);
+        return filmStorage.add(film);
     }
 
     public Film update(Film film) {
         validate(film);
-        return storage.update(film);
+        return filmStorage.update(film);
     }
 
     private void validate(Film film) {
@@ -47,29 +43,21 @@ public class FilmService {
     }
 
     public Film findFilmById(Long id) {
-        Film film = storage.findFilmById(id);
-        if (film == null) {
-            log.warn("Фильм {} не найден", id);
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
-
-        return film;
+        return filmStorage.findFilmById(id);
     }
 
     public List<Film> getFilms(int count) {
         log.info("Получение {} фильмов", count);
-        return storage.findFilms(count);
+        return filmStorage.findFilms(count);
     }
 
-    public void addLike(Long id, Long filmId) {
-        Film film = findFilmById(filmId);
-        film.getLikes().add(id);
-        log.info("Пользователь {} поставил лайк фильму {}", id, filmId);
+    public void addLike(Long id, Long userId) {
+        log.info("Пользователь {} поставил лайк фильму {}", id, userId);
+        likeStorage.addLike(id, userId);
     }
 
     public void deleteLike(Long id, Long filmId) {
-        Film film = findFilmById(filmId);
-        film.getLikes().remove(id);
         log.info("Пользователь {} удалил лайк у фильма {}", id, filmId);
+        likeStorage.deleteLike(id, filmId);
     }
 }
