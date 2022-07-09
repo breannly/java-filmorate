@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.entity.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -11,14 +11,10 @@ import java.util.List;
 
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/films")
 public class FilmController {
     private final FilmService service;
-
-    @Autowired
-    public FilmController(FilmService service) {
-        this.service = service;
-    }
 
     @GetMapping
     public Collection<Film> findAll() {
@@ -36,18 +32,18 @@ public class FilmController {
     }
 
     @GetMapping("/{id}")
-    public Film getFilmById(@PathVariable Long id) {
-        return service.findFilmById(id);
+    public Film getFilmById(@PathVariable("id") Long filmId) {
+        return service.findFilmById(filmId);
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
-        service.addLike(id, userId);
+    public void addLike(@PathVariable("id") Long filmId, @PathVariable Long userId) {
+        service.addLike(filmId, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public void deleteLike(@PathVariable Long id, @PathVariable Long userId) {
-        service.deleteLike(id, userId);
+    public void deleteLike(@PathVariable("id") Long filmId, @PathVariable Long userId) {
+        service.deleteLike(filmId, userId);
     }
 
     @GetMapping("/popular")

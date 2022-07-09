@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.entity.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -10,14 +10,10 @@ import java.util.Collection;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/users")
 public class UserController {
     private final UserService service;
-
-    @Autowired
-    public UserController(UserService service) {
-        this.service = service;
-    }
 
     @GetMapping
     public Collection<User> findAll() {
@@ -35,27 +31,27 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable Long id) {
-        return service.findUserById(id);
+    public User getUserById(@PathVariable("id") Long userId) {
+        return service.findUserById(userId);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        service.addFriend(id, friendId);
+    public void addFriend(@PathVariable("id") Long userId, @PathVariable Long friendId) {
+        service.addFriend(userId, friendId);
     }
 
     @DeleteMapping("{id}/friends/{friendId}")
-    public void deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        service.deleteFriend(id, friendId);
+    public void deleteFriend(@PathVariable("id") Long userId, @PathVariable Long friendId) {
+        service.deleteFriend(userId, friendId);
     }
 
     @GetMapping("{id}/friends")
-    public List<User> getFriends(@PathVariable Long id) {
-        return service.getFriends(id);
+    public List<User> findFriends(@PathVariable("id") Long userId) {
+        return service.findFriends(userId);
     }
 
     @GetMapping("{id}/friends/common/{otherId}")
-    public List<User> getMutualFriends(@PathVariable Long id, @PathVariable Long otherId) {
-        return service.getMutualFriends(id, otherId);
+    public List<User> findMutualFriends(@PathVariable("id") Long userId, @PathVariable Long otherId) {
+        return service.findMutualFriends(userId, otherId);
     }
 }
