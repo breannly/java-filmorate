@@ -25,6 +25,7 @@ public class FilmService {
     private final GenreStorageDao genreStorage;
 
     public List<Film> findAll() {
+        log.info("Получение списка всех фильмов");
         return filmStorage.findAll();
     }
 
@@ -32,6 +33,7 @@ public class FilmService {
         validate(film);
         filmStorage.add(film);
         genreStorage.add(film.getId(), film.getGenres());
+        log.info("Добавление нового фильма c id {}", film.getId());
 
         return findFilmById(film.getId());
     }
@@ -39,10 +41,12 @@ public class FilmService {
     public Film update(Film film) {
         validate(film);
         if (!filmStorage.existsById(film.getId())) {
+            log.warn("Фильм с id {} не найден", film.getId());
             throw new ObjectNotFoundException("Фильм не найден");
         }
         filmStorage.update(film);
         genreStorage.add(film.getId(), film.getGenres());
+        log.info("Обновление фильма с id {}", film.getId());
 
         return findFilmById(film.getId());
     }
@@ -56,12 +60,14 @@ public class FilmService {
         }
     }
 
-    public Film findFilmById(Long id) {
-        if (!filmStorage.existsById(id)) {
+    public Film findFilmById(Long filmId) {
+        if (!filmStorage.existsById(filmId)) {
+            log.warn("Фильм с id {} не найден", filmId);
             throw new ObjectNotFoundException("Фильм не найден");
         }
-        Film foundFilm = filmStorage.findById(id);
-        foundFilm.setGenres(genreStorage.findAllById(id));
+        Film foundFilm = filmStorage.findById(filmId);
+        foundFilm.setGenres(genreStorage.findAllById(filmId));
+        log.info("Получение фильма с id {}", filmId);
         return foundFilm;
     }
 
