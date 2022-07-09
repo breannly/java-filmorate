@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.entity.Genre;
 import ru.yandex.practicum.filmorate.storage.film.dao.GenreStorageDao;
 
@@ -17,6 +18,9 @@ public class GenreService {
     }
 
     public Genre findGenreById(Long genreId) {
-        return genreStorage.findGenreById(genreId);
+        if (!genreStorage.existsById(genreId)) {
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+        }
+        return genreStorage.findById(genreId);
     }
 }

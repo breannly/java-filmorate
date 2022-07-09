@@ -3,10 +3,13 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.entity.Film;
 import ru.yandex.practicum.filmorate.storage.film.dao.FilmStorageDao;
+import ru.yandex.practicum.filmorate.storage.film.dao.GenreStorageDao;
 import ru.yandex.practicum.filmorate.storage.film.dao.LikeStorageDao;
+import ru.yandex.practicum.filmorate.storage.user.dao.UserStorageDao;
 
 import java.util.List;
 
@@ -17,7 +20,9 @@ import static ru.yandex.practicum.filmorate.config.Config.validateDate;
 @RequiredArgsConstructor
 public class FilmService {
     private final FilmStorageDao filmStorage;
+    private final UserStorageDao userStorage;
     private final LikeStorageDao likeStorage;
+    private final GenreStorageDao genreStorage;
 
     public List<Film> findAll() {
         return filmStorage.findAll();
@@ -25,12 +30,21 @@ public class FilmService {
 
     public Film add(Film film) {
         validate(film);
-        return filmStorage.add(film);
+        filmStorage.add(film);
+        genreStorage.add(film.getId(), film.getGenres());
+
+        return findFilmById(film.getId());
     }
 
     public Film update(Film film) {
         validate(film);
-        return filmStorage.update(film);
+        if (!filmStorage.existsById(film.getId())) {
+            throw new ObjectNotFoundException("Фильм не найден");
+        }
+        filmStorage.update(film);
+        genreStorage.add(film.getId(), film.getGenres());
+
+        return findFilmById(film.getId());
     }
 
     private void validate(Film film) {
@@ -43,7 +57,12 @@ public class FilmService {
     }
 
     public Film findFilmById(Long id) {
-        return filmStorage.findFilmById(id);
+        if (!filmStorage.existsById(id)) {
+            throw new ObjectNotFoundException("Фильм не найден");
+        }
+        Film foundFilm = filmStorage.findById(id);
+        foundFilm.setGenres(genreStorage.findAllById(id));
+        return foundFilm;
     }
 
     public List<Film> getFilms(int count) {
@@ -51,13 +70,19 @@ public class FilmService {
         return filmStorage.findFilms(count);
     }
 
-    public void addLike(Long id, Long userId) {
-        log.info("Пользователь {} поставил лайк фильму {}", id, userId);
-        likeStorage.addLike(id, userId);
+    public void addLike(Long filmId, Long userId) {
+        if (!(filmStorage.existsById(filmId) && userStorage.existsById(userId))) {
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+        }
+        log.info("Пользователь {} поставил лайк фильму {}", userId, filmId);
+        likeStorage.addLike(filmId, userId);
     }
 
-    public void deleteLike(Long id, Long filmId) {
-        log.info("Пользователь {} удалил лайк у фильма {}", id, filmId);
-        likeStorage.deleteLike(id, filmId);
+    public void deleteLike(Long filmId, Long userId) {
+        if (!(filmStorage.existsById(filmId) && userStorage.existsById(userId))) {
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+        }
+        log.info("Пользователь {} удалил лайк у фильма {}", userId, filmId);
+        likeStorage.deleteLike(filmId, userId);
     }
 }

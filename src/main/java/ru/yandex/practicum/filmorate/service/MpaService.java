@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.entity.Mpa;
 import ru.yandex.practicum.filmorate.storage.film.dao.MpaStorageDao;
 
@@ -16,7 +17,10 @@ public class MpaService {
         return mpaStorage.findAll();
     }
 
-    public Mpa findGenreById(Long genreId) {
-        return mpaStorage.findMpaById(genreId);
+    public Mpa findMpaById(Long mpaId) {
+        if (!mpaStorage.existsById(mpaId)) {
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+        }
+        return mpaStorage.findById(mpaId);
     }
 }
