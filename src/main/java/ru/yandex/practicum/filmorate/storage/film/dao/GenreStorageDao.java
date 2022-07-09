@@ -5,7 +5,13 @@ import ru.yandex.practicum.filmorate.model.entity.Genre;
 import java.util.List;
 
 public interface GenreStorageDao {
-    public List<Genre> findAll();
+    List<Genre> findAll();
 
-    public Genre findGenreById(Long genreId);
+    Genre findById(Long genreId);
+
+    List<Genre> add(Long filmId, List<Genre> genres);
+
+    List<Genre> findAllById(Long genreId);
+
+    boolean existsById(Long genreId);
 }

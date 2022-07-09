@@ -1,72 +1,50 @@
 package ru.yandex.practicum.filmorate.storage.film.impl;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.entity.Film;
-import ru.yandex.practicum.filmorate.model.entity.Genre;
-import ru.yandex.practicum.filmorate.model.entity.Mpa;
 import ru.yandex.practicum.filmorate.storage.film.dao.FilmStorageDao;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
-import ru.yandex.practicum.filmorate.storage.mapper.GenreMapper;
-import ru.yandex.practicum.filmorate.storage.mapper.MpaMapper;
 
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static ru.yandex.practicum.filmorate.config.Config.*;
-
-@Slf4j
-@Component
+@Repository
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorageDao {
     private final JdbcTemplate jdbcTemplate;
     private final FilmMapper filmMapper;
-    private final MpaMapper mpaMapper;
+
+    public static final String SQL_QUERY_FIND_ALL_FILMS = "SELECT * FROM FILMS AS ff " +
+            "JOIN MPA AS m ON ff.mpa_id = m.mpa_id";
+    public static final String SQL_QUERY_FIND_FILMS = "SELECT * FROM FILMS AS ff " +
+            "JOIN MPA AS m ON ff.mpa_id = m.mpa_id " +
+            "LEFT JOIN FILM_LIKES AS fl ON ff.film_id = fl.film_id GROUP BY ff.name ORDER BY COUNT(user_id) DESC LIMIT ?";
+    public static final String SQL_QUERY_FIND_FILM_BY_ID = "SELECT * FROM FILMS AS ff " +
+            "JOIN MPA AS m ON ff.mpa_id = m.mpa_id WHERE film_id = ?";
+    public static final String SQL_QUERY_ADD_FILM = "INSERT INTO FILMS" +
+            "(name, description, release_date, duration, mpa_id) values (?, ?, ?, ?, ?)";
+    public static final String SQL_QUERY_UPDATE_FILM = "UPDATE FILMS " +
+            "SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? WHERE film_id = ?";
+    public static final String SQL_QUERY_CHECK_FILM = "SELECT COUNT(*) FROM FILMS WHERE film_id = ?";
 
     @Override
     public List<Film> findAll() {
-        try {
-            List<Film> films = jdbcTemplate.query(SQL_QUERY_FIND_ALL_FILMS, filmMapper);
-            films.forEach(film -> film.setGenres(findGenreById(film.getId())));
-            return films;
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<>();
-        }
+        return jdbcTemplate.query(SQL_QUERY_FIND_ALL_FILMS, filmMapper);
     }
 
     @Override
     public List<Film> findFilms(int count) {
-        try {
-            List<Film> films = jdbcTemplate.query(SQL_QUERY_FIND_FILMS, filmMapper, count);
-            films.forEach(film -> film.setGenres(findGenreById(film.getId())));
-            return films;
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<>();
-        }
+        return jdbcTemplate.query(SQL_QUERY_FIND_FILMS, filmMapper, count);
     }
 
     @Override
-    public Film findFilmById(Long id) {
-        try {
-            Film film = jdbcTemplate.queryForObject(SQL_QUERY_FIND_FILM_BY_ID, filmMapper, id);
-            film.setGenres(findGenreById(film.getId()));
-            return film;
-        } catch (EmptyResultDataAccessException e) {
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
-    }
-
-    private List<Genre> findGenreById(Long filmId) {
-        List<Genre> genres = jdbcTemplate.query(SQL_QUERY_FIND_GENRES, new GenreMapper(), filmId);
-        return genres;
+    public Film findById(Long id) {
+        return jdbcTemplate.queryForObject(SQL_QUERY_FIND_FILM_BY_ID, filmMapper, id);
     }
 
     @Override
@@ -83,26 +61,12 @@ public class FilmDbStorage implements FilmStorageDao {
             return stmt;
         }, keyHolder);
         film.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
-        film.setMpa(setMpa(film.getId()));
-
-        if (film.getGenres() != null) {
-            film.setGenres(addGenres(film.getId(), film.getGenres()));
-        }
         return film;
-    }
-
-    private Mpa setMpa(Long filmId) {
-        return jdbcTemplate.queryForObject(SQL_QUERY_FIND_MPA, mpaMapper, filmId);
-    }
-
-    private List<Genre> addGenres(Long filmId, List<Genre> genres) {
-        genres.forEach(genre -> jdbcTemplate.update(SQL_QUERY_ADD_GENRE, filmId, genre.getId()));
-        return findGenreById(filmId);
     }
 
     @Override
     public Film update(Film film) {
-        int count = jdbcTemplate.update(SQL_QUERY_UPDATE_FILM,
+        jdbcTemplate.update(SQL_QUERY_UPDATE_FILM,
                 film.getName(),
                 film.getDescription(),
                 film.getReleaseDate(),
@@ -110,16 +74,13 @@ public class FilmDbStorage implements FilmStorageDao {
                 film.getMpa().getId(),
                 film.getId());
 
-        if (count == 0) {
-            throw new ObjectNotFoundException("Вызов несуществующего ответа");
-        }
-
-        film.setMpa(setMpa(film.getId()));
-
-        if (film.getGenres() != null) {
-            jdbcTemplate.update(SQL_QUERY_DELETE_GENRES, film.getId());
-            film.setGenres(addGenres(film.getId(), film.getGenres()));
-        }
         return film;
+    }
+
+    @Override
+    public boolean existsById(Long id) {
+        Integer count = jdbcTemplate.queryForObject(SQL_QUERY_CHECK_FILM, Integer.class, id);
+        assert count != null;
+        return count.equals(1);
     }
 }

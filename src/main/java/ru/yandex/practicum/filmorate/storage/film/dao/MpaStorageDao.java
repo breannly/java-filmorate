@@ -5,7 +5,9 @@ import ru.yandex.practicum.filmorate.model.entity.Mpa;
 import java.util.List;
 
 public interface MpaStorageDao {
-    public List<Mpa> findAll();
+    List<Mpa> findAll();
 
-    public Mpa findMpaById(Long mpaId);
+    Mpa findById(Long mpaId);
+
+    boolean existsById(Long mpaId);
 }

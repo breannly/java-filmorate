@@ -1,12 +1,10 @@
 package ru.yandex.practicum.filmorate.storage.user.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.entity.User;
 import ru.yandex.practicum.filmorate.storage.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.storage.user.dao.UserStorageDao;
@@ -15,12 +13,18 @@ import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Objects;
 
-import static ru.yandex.practicum.filmorate.config.Config.*;
-
-@Component
+@Repository
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorageDao {
     private final JdbcTemplate jdbcTemplate;
+
+    public static final String SQL_QUERY_FIND_ALL_USERS = "SELECT * FROM USERS";
+    public static final String SQL_QUERY_FIND_USER_BY_ID = "SELECT * FROM USERS WHERE id = ?";
+    public static final String SQL_QUERY_ADD_USER = "INSERT INTO USERS(email, login, name, birthday) " +
+            "values (?, ?, ?, ?)";
+    public static final String SQL_QUERY_UPDATE_USER = "UPDATE USERS " +
+            "SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
+    private static final String SQL_QUERY_CHECK_USER = "SELECT COUNT(*) FROM USERS WHERE ID = ?";
 
     @Override
     public List<User> findAll() {
@@ -28,12 +32,8 @@ public class UserDbStorage implements UserStorageDao {
     }
 
     @Override
-    public User findUserById(Long id) {
-        try {
-            return jdbcTemplate.queryForObject(SQL_QUERY_FIND_USER_BY_ID, new UserMapper(), id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+    public User findById(Long id) {
+        return jdbcTemplate.queryForObject(SQL_QUERY_FIND_USER_BY_ID, new UserMapper(), id);
     }
 
     @Override
@@ -48,22 +48,25 @@ public class UserDbStorage implements UserStorageDao {
             stmt.setObject(4, user.getBirthday());
             return stmt;
         }, keyHolder);
-
         user.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         return user;
     }
 
     @Override
     public User update(User user) {
-        int count = jdbcTemplate.update(SQL_QUERY_UPDATE_USER,
+        jdbcTemplate.update(SQL_QUERY_UPDATE_USER,
                 user.getEmail(),
                 user.getLogin(),
                 user.getName(),
                 user.getBirthday(),
                 user.getId());
+        return user;
+    }
 
-        if (count > 0) {
-            return user;
-        } else throw new ObjectNotFoundException("Вызов несуществующего объекта");
+    @Override
+    public boolean existsById(Long userId) {
+        Integer count = jdbcTemplate.queryForObject(SQL_QUERY_CHECK_USER, Integer.class, userId);
+        assert count != null;
+        return count.equals(1);
     }
 }
