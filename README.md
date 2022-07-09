@@ -8,31 +8,32 @@ Cоциальная сеть, которая поможет выбрать ки�
 
 ## Модель базы данных
 
-![model](https://sun9-east.userapi.com/sun9-73/s/v1/ig2/gVA9mfcdUO9xEr7XAM33SxnblocuPHH0GWBKzDizswNP1KOFVy1POmmiY-p4Ktk_inwLsbW7r-vsrrh_eUJtPoDn.jpg?size=1314x640&quality=96&type=album)
+![model](https://sun9-east.userapi.com/sun9-59/s/v1/ig2/QFju8O9HFxDjXG1jz7Sy6D-u7EIpo1UnHfJRvDmF0aKsUbNvqou3x75GiJKvLw8kGsNzt_IotSGGZ_J58uTl2w_6.jpg?size=1337x688&quality=96&type=album)
 
 #### Пример запросов:
 
 * Получение всех фильмов
 
 ``` SQL
-SELECT name
-FROM filmorate_films;
+SELECT *
+FROM FILMS;
 ```
 
 * Получение всех пользователей
 
 ``` SQL
 SELECT *
-FROM filmorate_films;
+FROM USERS;
 ```
 
 * Получение топ N наиболее популярных фильмов
 
 ``` SQL
-SELECT name
-FROM filmorate_films AS ff
-JOIN films_likes AS fl ON ff.film_id = fl.film_id
-GROUP BY ff.name
+SELECT *
+FROM FILMS AS f
+JOIN MPA AS m ON f.mpa_id = m.mpa_id
+LEFT JOIN FILM_LIKES AS fl ON f.film_id = fl.film_id
+GROUP BY f.name
 ORDER BY COUNT(user_id) DESC
 LIMIT {N}; -- N - количество фильмов
 ```
@@ -41,19 +42,17 @@ LIMIT {N}; -- N - количество фильмов
 
 ``` SQL
 SELECT *
-FROM filmorate_users
+FROM USERS 
 WHERE EXISTS
     (SELECT *
-     FROM users_friends
-     WHERE users_friends.from_id = {first_id}
-       AND users_friends.status_id = 1
-       AND users_friends.to_id = filmorate_users.id )
+     FROM USER_FRIENDS
+     WHERE USER_FRIENDS.user_id = {first_id}
+       AND USER_FRIENDS.friend_id = USERS.USER_ID) 
   AND EXISTS
     (SELECT *
-     FROM users_friends
-     WHERE users_friends.from_id = {second_id}
-       AND users_friends.status_id = 1
-       AND users_friends.to_id = filmorate_users.id );
+     FROM USER_FRIENDS
+     WHERE user_friends.user_id = {second_id}
+       AND USER_FRIENDS.friend_id = USERS.USER_ID)
 ```
 ---
 ![GitHub forks](https://img.shields.io/github/forks/Arnulogus/java-filmorate?style=for-the-badge)

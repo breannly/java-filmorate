@@ -21,9 +21,9 @@ public class FilmDbStorage implements FilmStorageDao {
 
     public static final String SQL_QUERY_FIND_ALL_FILMS = "SELECT * FROM FILMS AS ff " +
             "JOIN MPA AS m ON ff.mpa_id = m.mpa_id";
-    public static final String SQL_QUERY_FIND_FILMS = "SELECT * FROM FILMS AS ff " +
-            "JOIN MPA AS m ON ff.mpa_id = m.mpa_id " +
-            "LEFT JOIN FILM_LIKES AS fl ON ff.film_id = fl.film_id GROUP BY ff.name ORDER BY COUNT(user_id) DESC LIMIT ?";
+    public static final String SQL_QUERY_FIND_FILMS = "SELECT * FROM FILMS AS f " +
+            "JOIN MPA AS m ON f.mpa_id = m.mpa_id " +
+            "LEFT JOIN FILM_LIKES AS fl ON f.film_id = fl.film_id GROUP BY f.name ORDER BY COUNT(user_id) DESC LIMIT ?";
     public static final String SQL_QUERY_FIND_FILM_BY_ID = "SELECT * FROM FILMS AS ff " +
             "JOIN MPA AS m ON ff.mpa_id = m.mpa_id WHERE film_id = ?";
     public static final String SQL_QUERY_ADD_FILM = "INSERT INTO FILMS" +
