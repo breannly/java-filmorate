@@ -17,23 +17,24 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorageDao {
     private final JdbcTemplate jdbcTemplate;
+    private final UserMapper userMapper;
 
     public static final String SQL_QUERY_FIND_ALL_USERS = "SELECT * FROM USERS";
-    public static final String SQL_QUERY_FIND_USER_BY_ID = "SELECT * FROM USERS WHERE id = ?";
+    public static final String SQL_QUERY_FIND_USER_BY_ID = "SELECT * FROM USERS WHERE USER_ID = ?";
     public static final String SQL_QUERY_ADD_USER = "INSERT INTO USERS(email, login, name, birthday) " +
             "values (?, ?, ?, ?)";
     public static final String SQL_QUERY_UPDATE_USER = "UPDATE USERS " +
-            "SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
-    private static final String SQL_QUERY_CHECK_USER = "SELECT COUNT(*) FROM USERS WHERE ID = ?";
+            "SET email = ?, login = ?, name = ?, birthday = ? WHERE USER_ID = ?";
+    private static final String SQL_QUERY_CHECK_USER = "SELECT COUNT(*) FROM USERS WHERE USER_ID = ?";
 
     @Override
     public List<User> findAll() {
-        return jdbcTemplate.query(SQL_QUERY_FIND_ALL_USERS, new UserMapper());
+        return jdbcTemplate.query(SQL_QUERY_FIND_ALL_USERS, userMapper);
     }
 
     @Override
     public User findById(Long id) {
-        return jdbcTemplate.queryForObject(SQL_QUERY_FIND_USER_BY_ID, new UserMapper(), id);
+        return jdbcTemplate.queryForObject(SQL_QUERY_FIND_USER_BY_ID, userMapper, id);
     }
 
     @Override
@@ -41,7 +42,7 @@ public class UserDbStorage implements UserStorageDao {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(SQL_QUERY_ADD_USER, new String[]{"id"});
+            PreparedStatement stmt = connection.prepareStatement(SQL_QUERY_ADD_USER, new String[]{"user_id"});
             stmt.setString(1, user.getEmail());
             stmt.setString(2, user.getLogin());
             stmt.setString(3, user.getName());

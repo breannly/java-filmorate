@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS USERS (
-    id int AUTO_INCREMENT PRIMARY KEY,
+    user_id int AUTO_INCREMENT PRIMARY KEY,
     email varchar(20),
     login varchar(20),
     name varchar(20),
@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS FRIENDSHIP_STATUSES (
 );
 
 CREATE TABLE IF NOT EXISTS USER_FRIENDS (
-    user_id int REFERENCES USERS (id),
-    friend_id int REFERENCES USERS (id),
+    user_id int REFERENCES USERS (user_id),
+    friend_id int REFERENCES USERS (user_id),
     status_id int DEFAULT 2,
     PRIMARY KEY (user_id, friend_id),
     FOREIGN KEY (status_id) REFERENCES FRIENDSHIP_STATUSES (status_id)
@@ -47,5 +47,6 @@ CREATE TABLE IF NOT EXISTS FILM_GENRES (
 
 CREATE TABLE IF NOT EXISTS FILM_LIKES (
     film_id int REFERENCES FILMS (film_id),
-    user_id int REFERENCES USERS (id)
+    user_id int REFERENCES USERS (user_id),
+    PRIMARY KEY (film_id, user_id)
 );

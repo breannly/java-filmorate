@@ -23,14 +23,14 @@ public class FriendDbStorage implements FriendStorageDao {
             "WHERE user_id = ? AND friend_id = ? OR user_id = ? AND friend_id = ?";
     public static final String SQL_QUERY_DELETE_FRIEND = "DELETE FROM USER_FRIENDS WHERE user_id = ? AND friend_id = ?";
     public static final String SQL_QUERY_FIND_FRIENDS = "SELECT * FROM USERS AS fu " +
-            "WHERE EXISTS (SELECT * FROM USER_FRIENDS WHERE user_id = ? AND friend_id = fu.id)";
+            "WHERE EXISTS (SELECT * FROM USER_FRIENDS WHERE user_id = ? AND friend_id = fu.USER_ID)";
     public static final String SQL_QUERY_FIND_MUTUAL_FRIENDS = "SELECT * FROM USERS " +
             "WHERE EXISTS " +
             "(SELECT * FROM user_friends WHERE USER_FRIENDS.user_id = ? " +
-            "AND USER_FRIENDS.friend_id = USERS.id ) " +
+            "AND USER_FRIENDS.friend_id = USERS.USER_ID) " +
             "AND EXISTS" +
             "(SELECT * FROM USER_FRIENDS WHERE user_friends.user_id = ? " +
-            "AND USER_FRIENDS.friend_id = USERS.id )";
+            "AND USER_FRIENDS.friend_id = USERS.USER_ID)";
 
     @Override
     public void addFriend(Long id, Long friendId) {
