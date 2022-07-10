@@ -1,107 +1,94 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.model.entity.User;
+import ru.yandex.practicum.filmorate.storage.user.dao.FriendStorageDao;
+import ru.yandex.practicum.filmorate.storage.user.dao.UserStorageDao;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserService {
-    private final UserStorage storage;
-
-    @Autowired
-    public UserService(UserStorage storage) {
-        this.storage = storage;
-    }
+    private final UserStorageDao userStorage;
+    private final FriendStorageDao friendStorage;
 
     public Collection<User> findAll() {
-        return storage.findAll();
+        log.info("Получение списка всех пользователей");
+        return userStorage.findAll();
     }
 
     public User add(User user) {
         validate(user);
-        return storage.add(user);
+        User addedUser = userStorage.add(user);
+        log.info("Добавление нового пользователя с id {}", addedUser.getId());
+
+        return addedUser;
     }
 
     public User update(User user) {
+        if (!userStorage.existsById(user.getId())) {
+            log.warn("Пользователь с id {} не найден", user.getId());
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+        }
         validate(user);
-        return storage.update(user);
+        log.info("Обновление пользователя с id {}", user.getId());
+        return userStorage.update(user);
     }
 
     private void validate(User user) {
         boolean isWrongName = user.getName().isBlank();
 
         if (isWrongName) {
-            log.info("У пользователя {} user изменено имя на {}", user, user.getLogin());
+            log.warn("У пользователя {} user изменено имя на {}", user, user.getLogin());
             user.setName(user.getLogin());
         }
     }
 
-    public void addFriend(Long id, Long friendId) {
-        User user = findUserById(id);
-        User userFriend = findUserById(friendId);
-
-        user.getFriends().add(friendId);
-        userFriend.getFriends().add(id);
-    }
-
-    public User findUserById(Long id) {
-        User user = storage.getUsers().get(id);
-        if (user == null) {
-            log.warn("Пользователь {} не найден", id);
+    public User findUserById(Long userId) {
+        if (!userStorage.existsById(userId)) {
+            log.warn("Пользователь с id {} не найден", userId);
             throw new ObjectNotFoundException("Вызов несуществующего объекта");
         }
-
-        return user;
+        log.info("Получение пользователя с id {}", userId);
+        return userStorage.findById(userId);
     }
 
-    public void deleteFriend(Long id, Long friendId) {
-        User user = findUserById(id);
-        User userFriend = findUserById(friendId);
-        log.info("Удаление из друзей {} {}", id, friendId);
-
-        user.getFriends().remove(friendId);
-        userFriend.getFriends().remove(id);
-    }
-
-    public List<User> getFriends(Long id) {
-        User user = findUserById(id);
-        log.info("Получение списка друзей {}", id);
-
-        return user.getFriends().stream()
-                .map(this::findUserById).
-                collect(Collectors.toList());
-    }
-
-    public List<User> getMutualFriends(Long id, Long otherId) {
-        // используется метод двух указателей, сложность алгоритма O(n)
-        List<User> mutualFriends = new ArrayList<>();
-        List<Long> idFriends = new ArrayList<>(findUserById(id).getFriends());
-        List<Long> otherIdFriends = new ArrayList<>(findUserById(otherId).getFriends());
-
-        int fPointer = 0;
-        int sPointer = 0;
-        while (fPointer < idFriends.size() && sPointer < otherIdFriends.size()) {
-            if (idFriends.get(fPointer) < otherIdFriends.get(sPointer)) {
-                fPointer++;
-            } else if (idFriends.get(fPointer) > otherIdFriends.get(sPointer)) {
-                sPointer++;
-            } else {
-                mutualFriends.add(findUserById(idFriends.get(fPointer)));
-                fPointer++;
-                sPointer++;
-            }
+    public void addFriend(Long userId, Long friendId) {
+        if (!(userStorage.existsById(userId) && userStorage.existsById(friendId))) {
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
         }
-        log.info("Вывод общих друзей {} и {}", id, otherId);
+        log.info("Пользователь {} добавил {}", userId, friendId);
+        friendStorage.addFriend(userId, friendId);
+    }
 
-        return mutualFriends;
+    public void deleteFriend(Long userId, Long friendId) {
+        if (!(userStorage.existsById(userId) && userStorage.existsById(friendId))) {
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+        }
+        log.info("Пользователь {} удалил {}", userId, friendId);
+        friendStorage.deleteFriend(userId, friendId);
+    }
+
+    public List<User> findFriends(Long userId) {
+        if (!userStorage.existsById(userId)) {
+            log.warn("Пользователь с id {} не найден", userId);
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+        }
+        log.info("Получение друзей пользователя с id {}", userId);
+        return friendStorage.findFriends(userId);
+    }
+
+    public List<User> findMutualFriends(Long userId, Long otherId) {
+        if (!(userStorage.existsById(userId) && userStorage.existsById(otherId))) {
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+        }
+        log.info("Получение общих друзей пользователей с id {} и {}", userId, otherId);
+        return friendStorage.findMutualFriends(userId, otherId);
     }
 }

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.model.entity;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
