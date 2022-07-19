@@ -31,13 +31,13 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable("id") Long userId) {
+    public User findUserById(@PathVariable("id") Long userId) {
         return service.findUserById(userId);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable("id") Long id){
-        service.deleteUser(id);
+    public void deleteUser(@PathVariable("id") Long userId){
+        service.deleteUser(userId);
     }
 
     @PutMapping("/{id}/friends/{friendId}")

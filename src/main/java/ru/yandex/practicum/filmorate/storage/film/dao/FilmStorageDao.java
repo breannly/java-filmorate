@@ -9,13 +9,13 @@ public interface FilmStorageDao {
 
     List<Film> findPopularFilms(int count);
 
-    Film findById(Long id);
+    Film findById(Long filmId);
 
     Film add(Film film);
 
     Film update(Film film);
 
-    void deleteFilm(Long id);
+    void deleteFilm(Long filmId);
 
-    boolean existsById(Long id);
+    boolean existsById(Long filmId);
 }

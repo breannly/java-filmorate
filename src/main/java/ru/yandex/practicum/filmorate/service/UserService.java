@@ -41,13 +41,13 @@ public class UserService {
         return userStorage.update(user);
     }
 
-    public void deleteUser(Long id) {
-        if (!userStorage.existsById(id)) {
-            log.warn("Пользователь с id {} не найден", id);
+    public void deleteUser(Long userId) {
+        if (!userStorage.existsById(userId)) {
+            log.warn("Пользователь с id {} не найден", userId);
             throw new ObjectNotFoundException("Вызов несуществующего объекта");
         }
-        userStorage.deleteUser(id);
-        log.info("Удаление  пользователя с id {}", id);
+        log.info("Удаление пользователя с id {}", userId);
+        userStorage.deleteUser(userId);
     }
 
     private void validate(User user) {

@@ -51,13 +51,13 @@ public class FilmService {
         return findFilmById(film.getId());
     }
 
-    public void deleteFilm(Long id) {
-        if (!filmStorage.existsById(id)) {
-            log.warn("Фильм с id {} не найден", id);
-            throw new ObjectNotFoundException("Фильм не найден");
+    public void deleteFilm(Long filmId) {
+        if (!filmStorage.existsById(filmId)) {
+            log.warn("Фильм с id {} не найден", filmId);
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
         }
-        filmStorage.deleteFilm(id);
-        log.info("Удаление фильма с id {}", id);
+        log.info("Удаление фильма с id {}", filmId);
+        filmStorage.deleteFilm(filmId);
     }
 
     private void validate(Film film) {
@@ -80,9 +80,11 @@ public class FilmService {
         return foundFilm;
     }
 
-    public List<Film> getPopularFilms(int count) {
+    public List<Film> findPopularFilms(int count) {
         log.info("Получение {} фильмов", count);
-        return filmStorage.findPopularFilms(count);
+        List<Film> popularFilms = filmStorage.findPopularFilms(count);
+        popularFilms.forEach(f -> f.setGenres(genreStorage.findAllById(f.getId())));
+        return popularFilms;
     }
 
     public void addLike(Long filmId, Long userId) {
