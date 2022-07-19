@@ -16,4 +16,6 @@ public interface FilmStorageDao {
     Film update(Film film);
 
     boolean existsById(Long id);
+
+	List<Film> getCommonFilmsForUsers(Long userId, Long friendId);
 }

@@ -32,6 +32,17 @@ public class FilmDbStorage implements FilmStorageDao {
             "SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? WHERE film_id = ?";
     public static final String SQL_QUERY_CHECK_FILM = "SELECT COUNT(*) FROM FILMS WHERE film_id = ?";
 
+    public static final String SQL_QUERY_FIND_COMMON_FILMS = "SELECT f.*, m.* FROM FILMS AS f " +
+            "JOIN MPA AS m ON f.mpa_id = m.mpa_id " +
+            "LEFT JOIN FILM_LIKES AS fl ON f.film_id = fl.film_id " +
+            "WHERE f.film_id IN " +
+            "(" +
+            "    SELECT film_id FROM FILM_LIKES WHERE user_id = ? " +
+            "    INTERSECT " +
+            "    SELECT film_id FROM FILM_LIKES WHERE user_id = ? " +
+            ")" +
+            "GROUP BY f.film_id ORDER BY COUNT(fl.user_id) DESC";
+
     @Override
     public List<Film> findAll() {
         return jdbcTemplate.query(SQL_QUERY_FIND_ALL_FILMS, filmMapper);
@@ -82,5 +93,10 @@ public class FilmDbStorage implements FilmStorageDao {
         Integer count = jdbcTemplate.queryForObject(SQL_QUERY_CHECK_FILM, Integer.class, id);
         assert count != null;
         return count.equals(1);
+    }
+
+    @Override
+    public List<Film> getCommonFilmsForUsers(Long userId, Long friendId) {
+        return jdbcTemplate.query(SQL_QUERY_FIND_COMMON_FILMS, filmMapper, userId, friendId);
     }
 }
