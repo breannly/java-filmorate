@@ -35,6 +35,11 @@ public class UserController {
         return service.findUserById(userId);
     }
 
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable("id") Long id){
+        service.deleteUser(id);
+    }
+
     @PutMapping("/{id}/friends/{friendId}")
     public void addFriend(@PathVariable("id") Long userId, @PathVariable Long friendId) {
         service.addFriend(userId, friendId);

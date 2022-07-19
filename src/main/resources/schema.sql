@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS FRIENDSHIP_STATUSES (
 );
 
 CREATE TABLE IF NOT EXISTS USER_FRIENDS (
-    user_id int REFERENCES USERS (user_id),
-    friend_id int REFERENCES USERS (user_id),
+    user_id int REFERENCES USERS (user_id) ON DELETE CASCADE,
+    friend_id int REFERENCES USERS (user_id) ON DELETE CASCADE,
     status_id int DEFAULT 2,
     PRIMARY KEY (user_id, friend_id),
     FOREIGN KEY (status_id) REFERENCES FRIENDSHIP_STATUSES (status_id)
@@ -40,13 +40,13 @@ CREATE TABLE IF NOT EXISTS GENRES  (
 );
 
 CREATE TABLE IF NOT EXISTS FILM_GENRES (
-    film_id int REFERENCES FILMS (film_id),
-    genre_id int REFERENCES GENRES (genre_id),
+    film_id int REFERENCES FILMS (film_id) ON DELETE CASCADE,
+    genre_id int REFERENCES GENRES (genre_id) ON DELETE CASCADE,
     PRIMARY KEY (film_id, genre_id)
 );
 
 CREATE TABLE IF NOT EXISTS FILM_LIKES (
-    film_id int REFERENCES FILMS (film_id),
-    user_id int REFERENCES USERS (user_id),
+    film_id int REFERENCES FILMS (film_id) ON DELETE CASCADE,
+    user_id int REFERENCES USERS (user_id) ON DELETE CASCADE,
     PRIMARY KEY (film_id, user_id)
 );
