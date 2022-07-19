@@ -7,13 +7,15 @@ import java.util.List;
 public interface FilmStorageDao {
     List<Film> findAll();
 
-    List<Film> findFilms(int count);
+    List<Film> findPopularFilms(int count);
 
-    Film findById(Long id);
+    Film findById(Long filmId);
 
     Film add(Film film);
 
     Film update(Film film);
 
-    boolean existsById(Long id);
+    void deleteFilm(Long filmId);
+
+    boolean existsById(Long filmId);
 }

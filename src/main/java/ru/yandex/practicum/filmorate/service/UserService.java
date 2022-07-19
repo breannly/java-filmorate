@@ -41,6 +41,15 @@ public class UserService {
         return userStorage.update(user);
     }
 
+    public void deleteUser(Long userId) {
+        if (!userStorage.existsById(userId)) {
+            log.warn("Пользователь с id {} не найден", userId);
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+        }
+        log.info("Удаление пользователя с id {}", userId);
+        userStorage.deleteUser(userId);
+    }
+
     private void validate(User user) {
         boolean isWrongName = user.getName().isBlank();
 

@@ -21,15 +21,17 @@ public class FilmDbStorage implements FilmStorageDao {
 
     public static final String SQL_QUERY_FIND_ALL_FILMS = "SELECT * FROM FILMS AS ff " +
             "JOIN MPA AS m ON ff.mpa_id = m.mpa_id";
-    public static final String SQL_QUERY_FIND_FILMS = "SELECT * FROM FILMS AS f " +
+    public static final String SQL_QUERY_FIND_POPULAR_FILMS = "SELECT * FROM FILMS AS f " +
             "JOIN MPA AS m ON f.mpa_id = m.mpa_id " +
-            "LEFT JOIN FILM_LIKES AS fl ON f.film_id = fl.film_id GROUP BY f.name ORDER BY COUNT(user_id) DESC LIMIT ?";
+            "LEFT JOIN FILM_LIKES AS fl ON f.film_id = fl.film_id " +
+            "GROUP BY f.FILM_ID, fl.USER_ID ORDER BY COUNT(user_id) DESC LIMIT ?";
     public static final String SQL_QUERY_FIND_FILM_BY_ID = "SELECT * FROM FILMS AS ff " +
             "JOIN MPA AS m ON ff.mpa_id = m.mpa_id WHERE film_id = ?";
     public static final String SQL_QUERY_ADD_FILM = "INSERT INTO FILMS" +
             "(name, description, release_date, duration, mpa_id) values (?, ?, ?, ?, ?)";
     public static final String SQL_QUERY_UPDATE_FILM = "UPDATE FILMS " +
             "SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? WHERE film_id = ?";
+    public static final String SQL_QUERY_DELETE_FILM = "DELETE FROM FILMS WHERE FILM_ID = ?";
     public static final String SQL_QUERY_CHECK_FILM = "SELECT COUNT(*) FROM FILMS WHERE film_id = ?";
 
     @Override
@@ -38,8 +40,8 @@ public class FilmDbStorage implements FilmStorageDao {
     }
 
     @Override
-    public List<Film> findFilms(int count) {
-        return jdbcTemplate.query(SQL_QUERY_FIND_FILMS, filmMapper, count);
+    public List<Film> findPopularFilms(int count) {
+        return jdbcTemplate.query(SQL_QUERY_FIND_POPULAR_FILMS, filmMapper, count);
     }
 
     @Override
@@ -75,6 +77,11 @@ public class FilmDbStorage implements FilmStorageDao {
                 film.getId());
 
         return film;
+    }
+
+    @Override
+    public void deleteFilm(Long id) {
+        jdbcTemplate.update(SQL_QUERY_DELETE_FILM, id);
     }
 
     @Override
