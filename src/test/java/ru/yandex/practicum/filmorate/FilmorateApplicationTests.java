@@ -80,14 +80,14 @@ class FilmorateApplicationTests {
                 .hasSize(1);
     }
 
-//    @Test
-//    void testFindFilms() {
-//        List<Film> films = filmStorage.findPopularFilms(10);
-//
-//        Assertions.assertThat(films)
-//                .isNotNull()
-//                .hasSize(1);
-//    }
+    @Test
+    void testFindFilms() {
+        List<Film> films = filmStorage.findPopularFilms(10, 0L, 0);
+
+        Assertions.assertThat(films)
+                .isNotNull()
+                .hasSize(1);
+    }
 
     @Test
     void testFindFilmById() {
