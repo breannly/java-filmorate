@@ -51,6 +51,15 @@ public class FilmService {
         return findFilmById(film.getId());
     }
 
+    public void deleteFilm(Long filmId) {
+        if (!filmStorage.existsById(filmId)) {
+            log.warn("Фильм с id {} не найден", filmId);
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+        }
+        log.info("Удаление фильма с id {}", filmId);
+        filmStorage.deleteFilm(filmId);
+    }
+
     private void validate(Film film) {
         boolean isWrongReleaseDate = film.getReleaseDate().isBefore(validateDate);
 
@@ -71,9 +80,11 @@ public class FilmService {
         return foundFilm;
     }
 
-    public List<Film> getFilms(int count) {
+    public List<Film> findPopularFilms(int count) {
         log.info("Получение {} фильмов", count);
-        return filmStorage.findFilms(count);
+        List<Film> popularFilms = filmStorage.findPopularFilms(count);
+        popularFilms.forEach(f -> f.setGenres(genreStorage.findAllById(f.getId())));
+        return popularFilms;
     }
 
     public void addLike(Long filmId, Long userId) {

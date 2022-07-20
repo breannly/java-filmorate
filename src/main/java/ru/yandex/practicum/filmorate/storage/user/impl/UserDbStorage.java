@@ -25,6 +25,7 @@ public class UserDbStorage implements UserStorageDao {
             "values (?, ?, ?, ?)";
     public static final String SQL_QUERY_UPDATE_USER = "UPDATE USERS " +
             "SET email = ?, login = ?, name = ?, birthday = ? WHERE USER_ID = ?";
+    public static final String SQL_QUERY_DELETE_USER = "DELETE FROM USERS WHERE USER_ID = ?";
     private static final String SQL_QUERY_CHECK_USER = "SELECT COUNT(*) FROM USERS WHERE USER_ID = ?";
 
     @Override
@@ -62,6 +63,11 @@ public class UserDbStorage implements UserStorageDao {
                 user.getBirthday(),
                 user.getId());
         return user;
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        jdbcTemplate.update(SQL_QUERY_DELETE_USER, id);
     }
 
     @Override
