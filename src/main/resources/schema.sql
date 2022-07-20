@@ -1,15 +1,48 @@
-CREATE TABLE IF NOT EXISTS USERS (
-    user_id int AUTO_INCREMENT PRIMARY KEY,
-    email varchar(20),
-    login varchar(20),
-    name varchar(20),
-    birthday date
-);
+DROP TABLE IF EXISTS MPA CASCADE;
+DROP TABLE IF EXISTS FILMS CASCADE;
+DROP TABLE IF EXISTS GENRES CASCADE;
+DROP TABLE IF EXISTS FILM_GENRES CASCADE;
+DROP TABLE IF EXISTS USER_FRIENDS CASCADE;
+DROP TABLE IF EXISTS FRIENDSHIP_STATUSES CASCADE;
+DROP TABLE IF EXISTS FILM_LIKES CASCADE;
+DROP TABLE IF EXISTS USERS CASCADE;
 
-CREATE TABLE IF NOT EXISTS FRIENDSHIP_STATUSES (
-    status_id int AUTO_INCREMENT PRIMARY KEY,
-    status varchar(20)
-);
+CREATE TABLE IF NOT EXISTS USERS
+(
+    user_id
+    int
+    AUTO_INCREMENT
+    PRIMARY
+    KEY,
+    email
+    varchar
+(
+    20
+),
+    login varchar
+(
+    20
+),
+    name varchar
+(
+    20
+),
+    birthday date
+    );
+
+CREATE TABLE IF NOT EXISTS FRIENDSHIP_STATUSES
+(
+    status_id
+    int
+    AUTO_INCREMENT
+    PRIMARY
+    KEY,
+    status
+    varchar
+(
+    20
+)
+    );
 
 CREATE TABLE IF NOT EXISTS USER_FRIENDS (
     user_id int REFERENCES USERS (user_id) ON DELETE CASCADE,
