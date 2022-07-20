@@ -96,7 +96,7 @@ public class FilmDbStorage implements FilmStorageDao {
     }
 
     @Override
-    public List<Film> getCommonFilmsForUsers(Long userId, Long friendId) {
+    public List<Film> findCommonFilmsForUsers(Long userId, Long friendId) {
         return jdbcTemplate.query(SQL_QUERY_FIND_COMMON_FILMS, filmMapper, userId, friendId);
     }
 }
