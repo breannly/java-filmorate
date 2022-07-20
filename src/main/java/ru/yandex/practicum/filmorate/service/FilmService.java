@@ -80,9 +80,9 @@ public class FilmService {
         return foundFilm;
     }
 
-    public List<Film> findPopularFilms(int count) {
+    public List<Film> findPopularFilms(int count, Long genreId, int year) {
         log.info("Получение {} фильмов", count);
-        List<Film> popularFilms = filmStorage.findPopularFilms(count);
+        List<Film> popularFilms = filmStorage.findPopularFilms(count, genreId, year);
         popularFilms.forEach(f -> f.setGenres(genreStorage.findAllById(f.getId())));
         return popularFilms;
     }

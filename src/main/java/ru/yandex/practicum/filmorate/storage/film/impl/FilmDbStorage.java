@@ -33,6 +33,17 @@ public class FilmDbStorage implements FilmStorageDao {
             "SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? WHERE film_id = ?";
     public static final String SQL_QUERY_DELETE_FILM = "DELETE FROM FILMS WHERE FILM_ID = ?";
     public static final String SQL_QUERY_CHECK_FILM = "SELECT COUNT(*) FROM FILMS WHERE film_id = ?";
+    public static final String SQL_QUERY_FIND_BY_YEAR = "SELECT * FROM FILMS F JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
+            "LEFT JOIN FILM_LIKES  FL ON FL.FILM_ID = F.FILM_ID WHERE YEAR(F.RELEASE_DATE) = ? " +
+            "GROUP BY F.FILM_ID ORDER BY COUNT(DISTINCT FL.USER_ID) DESC LIMIT ?";
+    public static final String SQL_QUERY_FIND_BY_YEAR_GENRE = "SELECT * FROM FILMS F JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
+            "LEFT JOIN FILM_LIKES  FL ON FL.FILM_ID = F.FILM_ID " +
+            "LEFT JOIN FILM_GENRES FG ON FG.FILM_ID = F.FILM_ID WHERE FG.GENRE_ID = ? AND YEAR(F.RELEASE_DATE) = ? " +
+            "GROUP BY F.FILM_ID ORDER BY COUNT(DISTINCT FL.USER_ID) DESC LIMIT ?";
+    public static final String SQL_QUERY_FIND_BY_GENRE = "SELECT * FROM FILMS F JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
+            "LEFT JOIN FILM_LIKES  FL ON FL.FILM_ID = F.FILM_ID " +
+            "LEFT JOIN FILM_GENRES FG ON FG.FILM_ID = F.FILM_ID WHERE FG.GENRE_ID = ? " +
+            "GROUP BY F.FILM_ID ORDER BY COUNT(DISTINCT FL.USER_ID) DESC LIMIT ?";
 
     @Override
     public List<Film> findAll() {
@@ -40,8 +51,16 @@ public class FilmDbStorage implements FilmStorageDao {
     }
 
     @Override
-    public List<Film> findPopularFilms(int count) {
-        return jdbcTemplate.query(SQL_QUERY_FIND_POPULAR_FILMS, filmMapper, count);
+    public List<Film> findPopularFilms(int count, Long genreId, int year) {
+        if (genreId == 0 && year == 0) {
+            return jdbcTemplate.query(SQL_QUERY_FIND_POPULAR_FILMS, filmMapper, count);
+        } else if (genreId != 0 && year != 0) {
+            return jdbcTemplate.query(SQL_QUERY_FIND_BY_YEAR_GENRE, filmMapper, genreId, year, count);
+        } else if (year != 0) {
+            return jdbcTemplate.query(SQL_QUERY_FIND_BY_YEAR, filmMapper, year, count);
+        } else {
+            return jdbcTemplate.query(SQL_QUERY_FIND_BY_GENRE, filmMapper, genreId, count);
+        }
     }
 
     @Override
