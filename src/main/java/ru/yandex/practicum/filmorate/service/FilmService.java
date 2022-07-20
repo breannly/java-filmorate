@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.entity.Film;
@@ -75,7 +76,7 @@ public class FilmService {
         boolean isWrongReleaseDate = film.getReleaseDate().isBefore(validateDate);
 
         if (isWrongReleaseDate) {
-            log.warn("Слишком раняя дата релиза");
+            log.warn("Слишком ранняя дата релиза");
             throw new ValidationException("Слишком ранняя дата релиза");
         }
     }
@@ -141,5 +142,15 @@ public class FilmService {
             film.setDirectors(directorStorage.findAllById(film.getId()));
         });
         return films;
+    }
+
+    public List<Film> getRecommendations(Long userId) {
+        if (!userStorage.existsById(userId)) {
+            log.warn("Пользователь с id {} не найден", userId);
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+        }
+        List<Film> recommendationsFilms = filmStorage.getRecommendations(userId);
+        recommendationsFilms.forEach(f -> f.setGenres(genreStorage.findAllById(f.getId())));
+        return recommendationsFilms;
     }
 }
