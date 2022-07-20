@@ -21,10 +21,6 @@ public class FilmDbStorage implements FilmStorageDao {
 
     public static final String SQL_QUERY_FIND_ALL_FILMS = "SELECT * FROM FILMS AS ff " +
             "JOIN MPA AS m ON ff.mpa_id = m.mpa_id";
-    public static final String SQL_QUERY_FIND_POPULAR_FILMS = "SELECT * FROM FILMS AS f " +
-            "JOIN MPA AS m ON f.mpa_id = m.mpa_id " +
-            "LEFT JOIN FILM_LIKES AS fl ON f.film_id = fl.film_id " +
-            "GROUP BY f.FILM_ID, fl.USER_ID ORDER BY COUNT(user_id) DESC LIMIT ?";
     public static final String SQL_QUERY_FIND_FILM_BY_ID = "SELECT * FROM FILMS AS ff " +
             "JOIN MPA AS m ON ff.mpa_id = m.mpa_id WHERE film_id = ?";
     public static final String SQL_QUERY_ADD_FILM = "INSERT INTO FILMS" +
@@ -33,7 +29,21 @@ public class FilmDbStorage implements FilmStorageDao {
             "SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? WHERE film_id = ?";
     public static final String SQL_QUERY_DELETE_FILM = "DELETE FROM FILMS WHERE FILM_ID = ?";
     public static final String SQL_QUERY_CHECK_FILM = "SELECT COUNT(*) FROM FILMS WHERE film_id = ?";
-
+    public static final String SQL_QUERY_FIND_POPULAR_FILMS = "SELECT * FROM FILMS AS f " +
+            "JOIN MPA AS m ON f.mpa_id = m.mpa_id " +
+            "LEFT JOIN FILM_LIKES AS fl ON f.film_id = fl.film_id " +
+            "GROUP BY f.FILM_ID, fl.USER_ID ORDER BY COUNT(user_id) DESC LIMIT ?";
+    public static final String SQL_QUERY_FIND_BY_YEAR = "SELECT * FROM FILMS F JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
+            "LEFT JOIN FILM_LIKES  FL ON FL.FILM_ID = F.FILM_ID WHERE YEAR(F.RELEASE_DATE) LIKE ? " +
+            "GROUP BY F.FILM_ID ORDER BY COUNT(DISTINCT FL.USER_ID) DESC LIMIT ?";
+    public static final String SQL_QUERY_FIND_BY_YEAR_GENRE = "SELECT * FROM FILMS F JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
+            "LEFT JOIN FILM_LIKES  FL ON FL.FILM_ID = F.FILM_ID " +
+            "LEFT JOIN FILM_GENRES FG ON FG.FILM_ID = F.FILM_ID WHERE FG.GENRE_ID = ? AND YEAR(F.RELEASE_DATE) = ? " +
+            "GROUP BY F.FILM_ID ORDER BY COUNT(DISTINCT FL.USER_ID) DESC LIMIT ?";
+    public static final String SQL_QUERY_FIND_BY_GENRE = "SELECT * FROM FILMS F JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
+            "LEFT JOIN FILM_LIKES  FL ON FL.FILM_ID = F.FILM_ID " +
+            "LEFT JOIN FILM_GENRES FG ON FG.FILM_ID = F.FILM_ID WHERE FG.GENRE_ID = ? " +
+            "GROUP BY F.FILM_ID ORDER BY COUNT(DISTINCT FL.USER_ID) DESC LIMIT ?";
     public static final String SQL_QUERY_FIND_COMMON_FILMS = "SELECT f.*, m.* FROM FILMS AS f " +
             "JOIN MPA AS m ON f.mpa_id = m.mpa_id " +
             "LEFT JOIN FILM_LIKES AS fl ON f.film_id = fl.film_id " +
@@ -51,8 +61,21 @@ public class FilmDbStorage implements FilmStorageDao {
     }
 
     @Override
-    public List<Film> findPopularFilms(int count) {
-        return jdbcTemplate.query(SQL_QUERY_FIND_POPULAR_FILMS, filmMapper, count);
+    public List<Film> findPopularFilms(int count, Long genreId, int year) {
+        if (genreId == 0 && year == 0) {
+            return jdbcTemplate.query(SQL_QUERY_FIND_POPULAR_FILMS, filmMapper, count);
+        }
+        return findFilmsByGenreAndYear(count, genreId, year);
+    }
+
+    private List<Film> findFilmsByGenreAndYear(int count, Long genreId, int year) {
+        if (genreId != 0 && year != 0) {
+            return jdbcTemplate.query(SQL_QUERY_FIND_BY_YEAR_GENRE, filmMapper, genreId, year, count);
+        }
+        if (year != 0) {
+            return jdbcTemplate.query(SQL_QUERY_FIND_BY_YEAR, filmMapper, year, count);
+        }
+        return jdbcTemplate.query(SQL_QUERY_FIND_BY_GENRE, filmMapper, genreId, count);
     }
 
     @Override

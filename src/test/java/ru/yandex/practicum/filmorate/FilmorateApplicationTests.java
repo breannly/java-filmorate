@@ -82,7 +82,7 @@ class FilmorateApplicationTests {
 
     @Test
     void testFindFilms() {
-        List<Film> films = filmStorage.findPopularFilms(10);
+        List<Film> films = filmStorage.findPopularFilms(10, 0L, 0);
 
         Assertions.assertThat(films)
                 .isNotNull()

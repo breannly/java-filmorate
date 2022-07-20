@@ -80,9 +80,13 @@ public class FilmService {
         return foundFilm;
     }
 
-    public List<Film> findPopularFilms(int count) {
+    public List<Film> findPopularFilms(int count, Long genreId, int year) {
         log.info("Получение {} фильмов", count);
-        List<Film> popularFilms = filmStorage.findPopularFilms(count);
+        if (year < 0 || count < 0)
+            throw new ValidationException("В параметрах запроса не должно быть отрицательных чисел.");
+        if (genreId != 0 && (!genreStorage.existsById(genreId)))
+            throw new ValidationException("Такого жанра нет");
+        List<Film> popularFilms = filmStorage.findPopularFilms(count, genreId, year);
         popularFilms.forEach(f -> f.setGenres(genreStorage.findAllById(f.getId())));
         return popularFilms;
     }

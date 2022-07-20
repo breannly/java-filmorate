@@ -7,7 +7,7 @@ import java.util.List;
 public interface FilmStorageDao {
     List<Film> findAll();
 
-    List<Film> findPopularFilms(int count);
+    List<Film> findPopularFilms(int count, Long genreId, int year);
 
     Film findById(Long filmId);
 
