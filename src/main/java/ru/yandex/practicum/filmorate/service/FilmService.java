@@ -106,4 +106,12 @@ public class FilmService {
         log.info("Пользователь {} удалил лайк у фильма {}", userId, filmId);
         likeStorage.deleteLike(filmId, userId);
     }
+
+    public List<Film> findCommonFilms(Long userId, Long friendId) {
+        if (!(userStorage.existsById(userId) && userStorage.existsById(friendId))) {
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+        }
+        log.info("Получение общих фильмов для пользователя {} и {}", userId, friendId);
+        return filmStorage.findCommonFilmsForUsers(userId, friendId);
+    }
 }
