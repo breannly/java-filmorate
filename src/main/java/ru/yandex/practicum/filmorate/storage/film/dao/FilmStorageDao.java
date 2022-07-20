@@ -18,4 +18,6 @@ public interface FilmStorageDao {
     void deleteFilm(Long filmId);
 
     boolean existsById(Long filmId);
+
+    List<Film> findCommonFilmsForUsers(Long userId, Long friendId);
 }
