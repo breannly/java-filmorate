@@ -9,7 +9,7 @@ public interface GenreStorageDao {
 
     Genre findById(Long genreId);
 
-    List<Genre> add(Long filmId, List<Genre> genres);
+    List<Genre> addToFilm(Long filmId, List<Genre> genres);
 
     List<Genre> findAllById(Long genreId);
 

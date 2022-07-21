@@ -88,5 +88,4 @@ public class DirectorDbStorage implements DirectorStorageDao {
     public void deleteDirector(Long id) {
         jdbcTemplate.update(SQL_QUERY_DELETE_DIRECTOR, id);
     }
-
 }

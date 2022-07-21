@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.entity.Director;
-import ru.yandex.practicum.filmorate.model.entity.User;
 import ru.yandex.practicum.filmorate.storage.film.dao.DirectorStorageDao;
 
 import java.util.List;
@@ -14,43 +13,43 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class DirectorService {
-    private final DirectorStorageDao directorsStorage;
+    private final DirectorStorageDao directorStorage;
 
     public List<Director> findAll() {
         log.info("Получение списка всех жанров");
-        return directorsStorage.findAll();
+        return directorStorage.findAll();
     }
 
     public Director findById(Long directorId) {
-        if (!directorsStorage.existsById(directorId)) {
+        if (!directorStorage.existsById(directorId)) {
             log.warn("Режиссер с id {} не найден", directorId);
             throw new ObjectNotFoundException("Вызов несуществующего объекта");
         }
         log.info("Получение жанра с id {}", directorId);
-        return directorsStorage.findById(directorId);
+        return directorStorage.findById(directorId);
     }
 
     public Director add(Director director) {
-        Director addedDirector = directorsStorage.add(director);
+        Director addedDirector = directorStorage.add(director);
         log.info("Добавление нового режиссетра с id {}", addedDirector.getId());
         return addedDirector;
     }
 
     public Director update(Director director) {
-        if (!directorsStorage.existsById(director.getId())) {
+        if (!directorStorage.existsById(director.getId())) {
             log.warn("Режиссер с id {} не найден", director.getId());
             throw new ObjectNotFoundException("Вызов несуществующего объекта");
         }
         log.info("Обновление режиссера с id {}", director.getId());
-        return directorsStorage.update(director);
+        return directorStorage.update(director);
     }
 
     public void deleteDirector(Long directorId) {
-        if (!directorsStorage.existsById(directorId)) {
+        if (!directorStorage.existsById(directorId)) {
             log.warn("Режиссер с id {} не найден", directorId);
             throw new ObjectNotFoundException("Вызов несуществующего объекта");
         }
         log.info("Удаление режиссера с id {}", directorId);
-        directorsStorage.deleteDirector(directorId);
+        directorStorage.deleteDirector(directorId);
     }
 }

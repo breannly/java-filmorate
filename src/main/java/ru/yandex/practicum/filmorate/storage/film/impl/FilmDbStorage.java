@@ -64,7 +64,7 @@ public class FilmDbStorage implements FilmStorageDao {
             ")" +
             "GROUP BY f.film_id ORDER BY COUNT(fl.user_id) DESC";
 
-    public static final String SQL_QUERY_FIND_FILMS_BY_DIRECTOR_SORT_BY_YEAR= "SELECT f.*, m.* FROM FILMS AS f " +
+    public static final String SQL_QUERY_FIND_FILMS_BY_DIRECTOR_SORT_BY_YEAR = "SELECT f.*, m.* FROM FILMS AS f " +
             "JOIN MPA AS m ON f.mpa_id = m.mpa_id " +
             "WHERE f.film_id IN " +
             "(" +
@@ -149,7 +149,7 @@ public class FilmDbStorage implements FilmStorageDao {
 
     @Override
     public List<Film> findFilmsByDirector(Long directorId, String sortBy) {
-        var query = sortBy.equalsIgnoreCase("year") ? SQL_QUERY_FIND_FILMS_BY_DIRECTOR_SORT_BY_YEAR
+        String query = sortBy.equalsIgnoreCase("year") ? SQL_QUERY_FIND_FILMS_BY_DIRECTOR_SORT_BY_YEAR
                 : SQL_QUERY_FIND_FILMS_BY_DIRECTOR_SORT_BY_LIKES;
         return jdbcTemplate.query(query, filmMapper, directorId);
     }
