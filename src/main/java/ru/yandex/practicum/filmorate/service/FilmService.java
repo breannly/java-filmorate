@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.entity.Director;
 import ru.yandex.practicum.filmorate.model.entity.Film;
+import ru.yandex.practicum.filmorate.storage.film.dao.DirectorStorageDao;
 import ru.yandex.practicum.filmorate.storage.film.dao.FilmStorageDao;
 import ru.yandex.practicum.filmorate.storage.film.dao.GenreStorageDao;
 import ru.yandex.practicum.filmorate.storage.film.dao.LikeStorageDao;
@@ -23,16 +25,21 @@ public class FilmService {
     private final UserStorageDao userStorage;
     private final LikeStorageDao likeStorage;
     private final GenreStorageDao genreStorage;
+    private final DirectorStorageDao directorsStorage;
 
     public List<Film> findAll() {
         log.info("Получение списка всех фильмов");
-        return filmStorage.findAll();
+        var films = filmStorage.findAll();
+        films.forEach(f -> f.setGenres(genreStorage.findAllById(f.getId())));
+        films.forEach(f -> f.setDirectors(directorsStorage.findAllById(f.getId())));
+        return films;
     }
 
     public Film add(Film film) {
         validate(film);
         filmStorage.add(film);
         genreStorage.add(film.getId(), film.getGenres());
+        directorsStorage.addToFilm(film.getId(), film.getDirectors());
         log.info("Добавление нового фильма c id {}", film.getId());
 
         return findFilmById(film.getId());
@@ -46,6 +53,7 @@ public class FilmService {
         }
         filmStorage.update(film);
         genreStorage.add(film.getId(), film.getGenres());
+        directorsStorage.addToFilm(film.getId(), film.getDirectors());
         log.info("Обновление фильма с id {}", film.getId());
 
         return findFilmById(film.getId());
@@ -76,6 +84,7 @@ public class FilmService {
         }
         Film foundFilm = filmStorage.findById(filmId);
         foundFilm.setGenres(genreStorage.findAllById(filmId));
+        foundFilm.setDirectors(directorsStorage.findAllById(filmId));
         log.info("Получение фильма с id {}", filmId);
         return foundFilm;
     }
@@ -88,6 +97,7 @@ public class FilmService {
             throw new ValidationException("Такого жанра нет");
         List<Film> popularFilms = filmStorage.findPopularFilms(count, genreId, year);
         popularFilms.forEach(f -> f.setGenres(genreStorage.findAllById(f.getId())));
+        popularFilms.forEach(f -> f.setDirectors(directorsStorage.findAllById(f.getId())));
         return popularFilms;
     }
 
@@ -113,5 +123,16 @@ public class FilmService {
         }
         log.info("Получение общих фильмов для пользователя {} и {}", userId, friendId);
         return filmStorage.findCommonFilmsForUsers(userId, friendId);
+    }
+
+    public List<Film> findFilmsByDirector(Long directorId, String sortBy) {
+        if (!(directorsStorage.existsById(directorId))) {
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+        }
+        log.info("Получение фильмов режиссера {} отсортированных по {}", directorId, sortBy);
+        var films = filmStorage.findFilmsByDirector(directorId, sortBy);
+        films.forEach(f -> f.setGenres(genreStorage.findAllById(f.getId())));
+        films.forEach(f -> f.setDirectors(directorsStorage.findAllById(f.getId())));
+        return films;
     }
 }
