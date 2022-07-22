@@ -58,3 +58,13 @@ CREATE TABLE IF NOT EXISTS FILM_LIKES
     user_id int REFERENCES USERS (user_id) ON DELETE CASCADE,
     PRIMARY KEY (film_id, user_id)
 );
+
+CREATE TABLE IF NOT EXISTS REVIEWS
+(
+    review_id   int AUTO_INCREMENT PRIMARY KEY,
+    content     varchar(200),
+    is_positive bool,
+    user_id     int REFERENCES REVIEWS (user_id) ON DELETE CASCADE,
+    film_id     int REFERENCES FILMS (film_id) ON DELETE CASCADE,
+    useful      int DEFAULT 0
+)
