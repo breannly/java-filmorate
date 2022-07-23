@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.entity.Film;
+import ru.yandex.practicum.filmorate.storage.film.dao.DirectorStorageDao;
 import ru.yandex.practicum.filmorate.storage.film.dao.FilmStorageDao;
 import ru.yandex.practicum.filmorate.storage.film.dao.GenreStorageDao;
 import ru.yandex.practicum.filmorate.storage.film.dao.LikeStorageDao;
@@ -23,19 +24,26 @@ public class FilmService {
     private final UserStorageDao userStorage;
     private final LikeStorageDao likeStorage;
     private final GenreStorageDao genreStorage;
+    private final DirectorStorageDao directorStorage;
 
     public List<Film> findAll() {
         log.info("Получение списка всех фильмов");
-        return filmStorage.findAll();
+        List<Film> films = filmStorage.findAll();
+        films.forEach(film -> {
+            film.setGenres(genreStorage.findAllById(film.getId()));
+            film.setDirectors(directorStorage.findAllById(film.getId()));
+        });
+        return films;
     }
 
     public Film add(Film film) {
         validate(film);
         filmStorage.add(film);
-        genreStorage.add(film.getId(), film.getGenres());
+        film.setGenres(genreStorage.addToFilm(film.getId(), film.getGenres()));
+        film.setDirectors(directorStorage.addToFilm(film.getId(), film.getDirectors()));
         log.info("Добавление нового фильма c id {}", film.getId());
 
-        return findFilmById(film.getId());
+        return film;
     }
 
     public Film update(Film film) {
@@ -45,10 +53,13 @@ public class FilmService {
             throw new ObjectNotFoundException("Фильм не найден");
         }
         filmStorage.update(film);
-        genreStorage.add(film.getId(), film.getGenres());
+        genreStorage.addToFilm(film.getId(), film.getGenres());
+        if (film.getGenres() != null) film.setGenres(genreStorage.findAllById(film.getId()));
+        directorStorage.addToFilm(film.getId(), film.getDirectors());
+        if (film.getDirectors() != null) film.setDirectors(directorStorage.findAllById(film.getId()));
         log.info("Обновление фильма с id {}", film.getId());
 
-        return findFilmById(film.getId());
+        return film;
     }
 
     public void deleteFilm(Long filmId) {
@@ -76,6 +87,7 @@ public class FilmService {
         }
         Film foundFilm = filmStorage.findById(filmId);
         foundFilm.setGenres(genreStorage.findAllById(filmId));
+        foundFilm.setDirectors(directorStorage.findAllById(filmId));
         log.info("Получение фильма с id {}", filmId);
         return foundFilm;
     }
@@ -87,7 +99,10 @@ public class FilmService {
         if (genreId != 0 && (!genreStorage.existsById(genreId)))
             throw new ValidationException("Такого жанра нет");
         List<Film> popularFilms = filmStorage.findPopularFilms(count, genreId, year);
-        popularFilms.forEach(f -> f.setGenres(genreStorage.findAllById(f.getId())));
+        popularFilms.forEach(film -> {
+            film.setGenres(genreStorage.findAllById(film.getId()));
+            film.setDirectors(directorStorage.findAllById(film.getId()));
+        });
         return popularFilms;
     }
 
@@ -113,5 +128,18 @@ public class FilmService {
         }
         log.info("Получение общих фильмов для пользователя {} и {}", userId, friendId);
         return filmStorage.findCommonFilmsForUsers(userId, friendId);
+    }
+
+    public List<Film> findFilmsByDirector(Long directorId, String sortBy) {
+        if (!(directorStorage.existsById(directorId))) {
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+        }
+        log.info("Получение фильмов режиссера {} отсортированных по {}", directorId, sortBy);
+        List<Film> films = filmStorage.findFilmsByDirector(directorId, sortBy);
+        films.forEach(film -> {
+            film.setGenres(genreStorage.findAllById(film.getId()));
+            film.setDirectors(directorStorage.findAllById(film.getId()));
+        });
+        return films;
     }
 }

@@ -55,6 +55,23 @@ public class FilmDbStorage implements FilmStorageDao {
             ")" +
             "GROUP BY f.film_id ORDER BY COUNT(fl.user_id) DESC";
 
+    public static final String SQL_QUERY_FIND_FILMS_BY_DIRECTOR_SORT_BY_LIKES = "SELECT f.*, m.* FROM FILMS AS f " +
+            "JOIN MPA AS m ON f.mpa_id = m.mpa_id " +
+            "LEFT JOIN FILM_LIKES AS fl ON f.film_id = fl.film_id " +
+            "WHERE f.film_id IN " +
+            "(" +
+            "    SELECT film_id FROM FILM_DIRECTORS WHERE director_id = ? " +
+            ")" +
+            "GROUP BY f.film_id ORDER BY COUNT(fl.user_id) DESC";
+
+    public static final String SQL_QUERY_FIND_FILMS_BY_DIRECTOR_SORT_BY_YEAR = "SELECT f.*, m.* FROM FILMS AS f " +
+            "JOIN MPA AS m ON f.mpa_id = m.mpa_id " +
+            "WHERE f.film_id IN " +
+            "(" +
+            "    SELECT film_id FROM FILM_DIRECTORS WHERE director_id = ? " +
+            ")" +
+            "ORDER BY f.release_date ASC";
+
     @Override
     public List<Film> findAll() {
         return jdbcTemplate.query(SQL_QUERY_FIND_ALL_FILMS, filmMapper);
@@ -128,5 +145,12 @@ public class FilmDbStorage implements FilmStorageDao {
     @Override
     public List<Film> findCommonFilmsForUsers(Long userId, Long friendId) {
         return jdbcTemplate.query(SQL_QUERY_FIND_COMMON_FILMS, filmMapper, userId, friendId);
+    }
+
+    @Override
+    public List<Film> findFilmsByDirector(Long directorId, String sortBy) {
+        String query = sortBy.equalsIgnoreCase("year") ? SQL_QUERY_FIND_FILMS_BY_DIRECTOR_SORT_BY_YEAR
+                : SQL_QUERY_FIND_FILMS_BY_DIRECTOR_SORT_BY_LIKES;
+        return jdbcTemplate.query(query, filmMapper, directorId);
     }
 }
