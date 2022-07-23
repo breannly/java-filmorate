@@ -150,7 +150,10 @@ public class FilmService {
             throw new ObjectNotFoundException("Вызов несуществующего объекта");
         }
         List<Film> recommendationsFilms = filmStorage.getRecommendations(userId);
-        recommendationsFilms.forEach(f -> f.setGenres(genreStorage.findAllById(f.getId())));
+        recommendationsFilms.forEach(f -> {
+            f.setGenres(genreStorage.findAllById(f.getId()));
+            f.setDirectors(directorStorage.findAllById(f.getId()));
+        });
         return recommendationsFilms;
     }
 }
