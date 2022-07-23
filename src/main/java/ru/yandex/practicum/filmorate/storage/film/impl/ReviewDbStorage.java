@@ -19,16 +19,38 @@ public class ReviewDbStorage implements ReviewStorageDao {
     private final JdbcTemplate jdbcTemplate;
     private final ReviewMapper reviewMapper;
 
-    private static final String SQL_QUERY_FIND_ALL_REVIEWS = "SELECT * FROM REVIEWS LIMIT ?";
-    private static final String SQL_QUERY_FIND_ALL_REVIEWS_BY_FILM = "SELECT * FROM REVIEWS " +
-            "WHERE FILM_ID = ? LIMIT ?";
-    private static final String SQL_QUERY_FIND_REVIEW_BY_ID = "SELECT * FROM REVIEWS WHERE REVIEW_ID = ?";
+    private static final String SQL_QUERY_FIND_ALL_REVIEWS = "SELECT R.*, NVL(SUM(MARK), 0) AS MARK " +
+            "FROM REVIEWS AS R " +
+            "LEFT JOIN REVIEW_REACTIONS AS RR ON R.REVIEW_ID = RR.REVIEW_ID " +
+            "LEFT JOIN REACTIONS AS RE ON RR.REVIEW_ID = RE.REACTION_ID " +
+            "GROUP BY R.REVIEW_ID ORDER BY MARK DESC LIMIT ?";
+    private static final String SQL_QUERY_FIND_ALL_REVIEWS_BY_FILM = "SELECT R.*, NVL(SUM(MARK), 0) AS MARK " +
+            "FROM REVIEWS AS R " +
+            "LEFT JOIN REVIEW_REACTIONS AS RR ON R.REVIEW_ID = RR.REVIEW_ID " +
+            "LEFT JOIN REACTIONS AS RE ON RR.REVIEW_ID = RE.REACTION_ID " +
+            "WHERE FILM_ID = ? GROUP BY R.REVIEW_ID ORDER BY MARK DESC LIMIT ?";
+    private static final String SQL_QUERY_FIND_REVIEW_BY_ID = "SELECT R.*, NVL(SUM(MARK), 0) AS MARK " +
+            "FROM REVIEWS AS R " +
+            "LEFT JOIN REVIEW_REACTIONS AS RR ON R.REVIEW_ID = RR.REVIEW_ID " +
+            "LEFT JOIN REACTIONS AS RE ON RR.REVIEW_ID = RE.REACTION_ID " +
+            "WHERE R.REVIEW_ID = ? GROUP BY R.REVIEW_ID";
     private static final String SQL_QUERY_ADD_REVIEW = "INSERT INTO REVIEWS " +
             "(content, is_positive, user_id, film_id) VALUES (?, ?, ?, ?)";
     private static final String SQL_QUERY_UPDATE_REVIEW = "UPDATE REVIEWS " +
-            "SET content = ?, is_positive = ?, user_id = ?, film_id = ? WHERE REVIEW_ID = ?";
+            "SET content = ?, is_positive = ? WHERE REVIEW_ID = ?";
     private static final String SQL_QUERY_DELETE_REVIEW = "DELETE FROM REVIEWS WHERE REVIEW_ID = ?";
     private static final String SQL_QUERY_CHECK_REVIEW = "SELECT COUNT(*) FROM REVIEWS WHERE REVIEW_ID = ?";
+    private static final String SQL_QUERY_ADD_LIKE = "MERGE INTO REVIEW_REACTIONS " +
+            "VALUES (?, ?, 2)";
+    private static final String SQL_QUERY_ADD_DISLIKE = "MERGE INTO REVIEW_REACTIONS " +
+            "VALUES (?, ?, 1)";
+    private static final String SQL_QUERY_DELETE_LIKE = "DELETE FROM REVIEW_REACTIONS " +
+            "WHERE REVIEW_ID = ? AND USER_ID = ?";
+    private static final String SQL_QUERY_DELETE_DISLIKE = "DELETE FROM REVIEW_REACTIONS " +
+            "WHERE REVIEW_ID = ? AND USER_ID = ?";
+    private static final String SQL_QUERY_CALCULATE_USEFUL = "SELECT SUM(MARK) FROM REVIEW_REACTIONS AS RR " +
+            "JOIN REACTIONS AS RE ON RR.REACTION_ID = RE.REACTION_ID " +
+            "WHERE REVIEW_ID = ? GROUP BY REVIEW_ID";
 
     @Override
     public List<Review> findAll(Long filmId, int count) {
@@ -64,8 +86,6 @@ public class ReviewDbStorage implements ReviewStorageDao {
         jdbcTemplate.update(SQL_QUERY_UPDATE_REVIEW,
                 review.getContent(),
                 review.getIsPositive(),
-                review.getUserId(),
-                review.getFilmId(),
                 review.getReviewId());
 
         return review;
@@ -81,5 +101,25 @@ public class ReviewDbStorage implements ReviewStorageDao {
         Integer count = jdbcTemplate.queryForObject(SQL_QUERY_CHECK_REVIEW, Integer.class, reviewId);
         assert count != null;
         return count.equals(1);
+    }
+
+    @Override
+    public void addLike(Long reviewId, Long userId) {
+        jdbcTemplate.update(SQL_QUERY_ADD_LIKE, reviewId, userId);
+    }
+
+    @Override
+    public void addDislike(Long reviewId, Long userId) {
+        jdbcTemplate.update(SQL_QUERY_ADD_DISLIKE, reviewId, userId);
+    }
+
+    @Override
+    public void deleteLike(Long reviewId, Long userId) {
+        jdbcTemplate.update(SQL_QUERY_DELETE_LIKE, reviewId, userId);
+    }
+
+    @Override
+    public void deleteDislike(Long reviewId, Long userId) {
+        jdbcTemplate.update(SQL_QUERY_DELETE_DISLIKE, reviewId, userId);
     }
 }

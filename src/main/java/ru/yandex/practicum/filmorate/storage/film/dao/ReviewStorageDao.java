@@ -13,7 +13,15 @@ public interface ReviewStorageDao {
 
     Review update(Review review);
 
+    boolean existsById(Long reviewId);
+
     void delete(Long reviewId);
 
-    boolean existsById(Long reviewId);
+    void addLike(Long reviewId, Long userId);
+
+    void addDislike(Long reviewId, Long userId);
+
+    void deleteLike(Long reviewId, Long userId);
+
+    void deleteDislike(Long reviewId, Long userId);
 }
