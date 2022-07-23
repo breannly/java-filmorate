@@ -69,13 +69,13 @@ public class FilmDbStorage implements FilmStorageDao {
     }
 
     private List<Film> findFilmsByGenreAndYear(int count, Long genreId, int year) {
-        if (genreId != 0 && year != 0) {
-            return jdbcTemplate.query(SQL_QUERY_FIND_BY_YEAR_GENRE, filmMapper, genreId, year, count);
-        }
-        if (year != 0) {
+        if (genreId == 0 && year != 0) {
             return jdbcTemplate.query(SQL_QUERY_FIND_BY_YEAR, filmMapper, year, count);
         }
-        return jdbcTemplate.query(SQL_QUERY_FIND_BY_GENRE, filmMapper, genreId, count);
+        if (genreId != 0 && year == 0) {
+            return jdbcTemplate.query(SQL_QUERY_FIND_BY_GENRE, filmMapper, genreId, count);
+        }
+        return jdbcTemplate.query(SQL_QUERY_FIND_BY_YEAR_GENRE, filmMapper, genreId, year, count);
     }
 
     @Override
