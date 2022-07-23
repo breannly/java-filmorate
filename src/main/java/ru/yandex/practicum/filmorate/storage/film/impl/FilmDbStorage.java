@@ -72,6 +72,22 @@ public class FilmDbStorage implements FilmStorageDao {
             ")" +
             "ORDER BY f.release_date ASC";
 
+    public static final String SQL_QUERY_GET_RECOMMENDATION =
+            "SELECT * FROM FILMS AS F " +
+            "JOIN MPA AS M ON F.MPA_ID = M.MPA_ID " +
+            "WHERE FILM_ID IN (" +
+            "    SELECT FILM_ID" +
+            "    FROM FILM_LIKES" +
+            "    WHERE USER_ID = (" +
+            "        SELECT TOP (1) USER_ID" +
+            "        FROM FILM_LIKES" +
+            "        WHERE FILM_ID IN" +
+            "              (SELECT FILM_ID FROM FILM_LIKES WHERE USER_ID = ?)" +
+            "          AND USER_ID != ?" +
+            "        GROUP BY USER_ID" +
+            "        ORDER BY COUNT(FILM_ID) DESC)" +
+            "      AND FILM_ID NOT IN (SELECT FILM_ID FROM FILM_LIKES WHERE USER_ID = ?))";
+
     @Override
     public List<Film> findAll() {
         return jdbcTemplate.query(SQL_QUERY_FIND_ALL_FILMS, filmMapper);
@@ -145,6 +161,11 @@ public class FilmDbStorage implements FilmStorageDao {
     @Override
     public List<Film> findCommonFilmsForUsers(Long userId, Long friendId) {
         return jdbcTemplate.query(SQL_QUERY_FIND_COMMON_FILMS, filmMapper, userId, friendId);
+    }
+
+    @Override
+    public List<Film> getRecommendations(Long userId) {
+        return jdbcTemplate.query(SQL_QUERY_GET_RECOMMENDATION, filmMapper, userId, userId, userId);
     }
 
     @Override
