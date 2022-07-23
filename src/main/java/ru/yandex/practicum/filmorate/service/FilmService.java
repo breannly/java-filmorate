@@ -29,19 +29,21 @@ public class FilmService {
     public List<Film> findAll() {
         log.info("Получение списка всех фильмов");
         List<Film> films = filmStorage.findAll();
-        films.forEach(f -> f.setGenres(genreStorage.findAllById(f.getId())));
-        films.forEach(f -> f.setDirectors(directorStorage.findAllById(f.getId())));
+        films.forEach(film -> {
+            film.setGenres(genreStorage.findAllById(film.getId()));
+            film.setDirectors(directorStorage.findAllById(film.getId()));
+        });
         return films;
     }
 
     public Film add(Film film) {
         validate(film);
         filmStorage.add(film);
-        genreStorage.addToFilm(film.getId(), film.getGenres());
-        directorStorage.addToFilm(film.getId(), film.getDirectors());
+        film.setGenres(genreStorage.addToFilm(film.getId(), film.getGenres()));
+        film.setDirectors(directorStorage.addToFilm(film.getId(), film.getDirectors()));
         log.info("Добавление нового фильма c id {}", film.getId());
 
-        return findFilmById(film.getId());
+        return film;
     }
 
     public Film update(Film film) {
@@ -52,10 +54,12 @@ public class FilmService {
         }
         filmStorage.update(film);
         genreStorage.addToFilm(film.getId(), film.getGenres());
+        if (film.getGenres() != null) film.setGenres(genreStorage.findAllById(film.getId()));
         directorStorage.addToFilm(film.getId(), film.getDirectors());
+        if (film.getDirectors() != null) film.setDirectors(directorStorage.findAllById(film.getId()));
         log.info("Обновление фильма с id {}", film.getId());
 
-        return findFilmById(film.getId());
+        return film;
     }
 
     public void deleteFilm(Long filmId) {
@@ -95,8 +99,10 @@ public class FilmService {
         if (genreId != 0 && (!genreStorage.existsById(genreId)))
             throw new ValidationException("Такого жанра нет");
         List<Film> popularFilms = filmStorage.findPopularFilms(count, genreId, year);
-        popularFilms.forEach(f -> f.setGenres(genreStorage.findAllById(f.getId())));
-        popularFilms.forEach(f -> f.setDirectors(directorStorage.findAllById(f.getId())));
+        popularFilms.forEach(film -> {
+            film.setGenres(genreStorage.findAllById(film.getId()));
+            film.setDirectors(directorStorage.findAllById(film.getId()));
+        });
         return popularFilms;
     }
 
@@ -130,8 +136,10 @@ public class FilmService {
         }
         log.info("Получение фильмов режиссера {} отсортированных по {}", directorId, sortBy);
         List<Film> films = filmStorage.findFilmsByDirector(directorId, sortBy);
-        films.forEach(f -> f.setGenres(genreStorage.findAllById(f.getId())));
-        films.forEach(f -> f.setDirectors(directorStorage.findAllById(f.getId())));
+        films.forEach(film -> {
+            film.setGenres(genreStorage.findAllById(film.getId()));
+            film.setDirectors(directorStorage.findAllById(film.getId()));
+        });
         return films;
     }
 }

@@ -7,7 +7,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 import static ru.yandex.practicum.filmorate.config.Config.MAX_SIZE_DESCRIPTION;
@@ -31,7 +30,7 @@ public class Film extends IdEntity {
     @NotNull
     private Mpa mpa;
 
-    private List<Genre> genres = new ArrayList<>();
+    private List<Genre> genres;
 
-    private List<Director> directors = new ArrayList<>();
+    private List<Director> directors;
 }

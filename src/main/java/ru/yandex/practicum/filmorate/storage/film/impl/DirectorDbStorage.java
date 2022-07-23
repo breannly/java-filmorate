@@ -47,7 +47,9 @@ public class DirectorDbStorage implements DirectorStorageDao {
     @Override
     public List<Director> addToFilm(Long filmId, List<Director> directors) {
         jdbcTemplate.update(SQL_QUERY_DELETE_DIRECTORS, filmId);
-        directors.forEach(director -> jdbcTemplate.update(SQL_QUERY_ADD_DIRECTOR_TO_FILM, filmId, director.getId()));
+        if (directors != null) {
+            directors.forEach(director -> jdbcTemplate.update(SQL_QUERY_ADD_DIRECTOR_TO_FILM, filmId, director.getId()));
+        }
         return findAllById(filmId);
     }
 
