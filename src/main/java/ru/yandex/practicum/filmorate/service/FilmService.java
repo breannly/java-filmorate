@@ -94,12 +94,12 @@ public class FilmService {
     }
 
     public List<Film> findPopularFilms(int count, Long genreId, int year) {
-        log.info("Получение {} фильмов", count);
-        if (year < 0 || count < 0)
-            throw new ValidationException("В параметрах запроса не должно быть отрицательных чисел.");
-        if (genreId != 0 && (!genreStorage.existsById(genreId)))
+        if (genreId != 0 && (!genreStorage.existsById(genreId))) {
+            log.warn("Жанры с id {} не найден", genreId);
             throw new ValidationException("Такого жанра нет");
+        }
         List<Film> popularFilms = filmStorage.findPopularFilms(count, genreId, year);
+        log.info("Получение {} фильмов", count);
         popularFilms.forEach(film -> {
             film.setGenres(genreStorage.findAllById(film.getId()));
             film.setDirectors(directorStorage.findAllById(film.getId()));

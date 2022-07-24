@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.model.entity.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 import java.util.List;
 
@@ -62,7 +63,7 @@ public class FilmController {
     @GetMapping("/popular")
     public List<Film> findPopularFilms(@RequestParam(defaultValue = "10") int count,
                                        @RequestParam(defaultValue = "0", required = false) Long genreId,
-                                       @RequestParam(defaultValue = "0", required = false) int year
+                                       @RequestParam(defaultValue = "0", required = false) @PositiveOrZero int year
     ) {
         return service.findPopularFilms(count, genreId, year);
     }
