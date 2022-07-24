@@ -4,9 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.model.entity.EventType;
+import ru.yandex.practicum.filmorate.model.entity.OperationType;
 import ru.yandex.practicum.filmorate.model.entity.Review;
 import ru.yandex.practicum.filmorate.storage.film.dao.FilmStorageDao;
 import ru.yandex.practicum.filmorate.storage.film.dao.ReviewStorageDao;
+import ru.yandex.practicum.filmorate.storage.user.dao.EventStorageDao;
 import ru.yandex.practicum.filmorate.storage.user.dao.UserStorageDao;
 
 import java.util.List;
@@ -18,6 +21,7 @@ public class ReviewService {
     private final ReviewStorageDao reviewStorage;
     private final FilmStorageDao filmStorage;
     private final UserStorageDao userStorage;
+    private final EventStorageDao eventStorage;
 
     public List<Review> findAll(Long filmId, int count) {
         if (filmId != 0 && (!filmStorage.existsById(filmId))) {
@@ -42,6 +46,7 @@ public class ReviewService {
             throw new ObjectNotFoundException("Вызов несуществующего объекта");
         }
         Review addedReview = reviewStorage.add(review);
+        eventStorage.add(review.getUserId(), EventType.REVIEW, OperationType.ADD, review.getReviewId());
         log.info("Добавление нового отзыва с id {}", addedReview.getReviewId());
         return addedReview;
     }
@@ -51,6 +56,8 @@ public class ReviewService {
             throw new ObjectNotFoundException("Вызов несуществующего объекта");
         }
         log.info("Обновление отзыва с id {}", review.getReviewId());
+        Long reviewAuthorId = findById(review.getReviewId()).getUserId();
+        eventStorage.add(reviewAuthorId, EventType.REVIEW, OperationType.UPDATE, review.getReviewId());
         return reviewStorage.update(review);
     }
 
@@ -60,6 +67,8 @@ public class ReviewService {
             throw new ObjectNotFoundException("Вызов несуществующего объекта");
         }
         log.info("Удаление отзыва с id {}", reviewId);
+        Review review = findById(reviewId);
+        eventStorage.add(review.getUserId(), EventType.REVIEW, OperationType.REMOVE, review.getReviewId());
         reviewStorage.delete(reviewId);
     }
 

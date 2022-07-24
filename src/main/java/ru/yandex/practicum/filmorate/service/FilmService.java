@@ -3,14 +3,16 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.entity.EventType;
 import ru.yandex.practicum.filmorate.model.entity.Film;
+import ru.yandex.practicum.filmorate.model.entity.OperationType;
 import ru.yandex.practicum.filmorate.storage.film.dao.DirectorStorageDao;
 import ru.yandex.practicum.filmorate.storage.film.dao.FilmStorageDao;
 import ru.yandex.practicum.filmorate.storage.film.dao.GenreStorageDao;
 import ru.yandex.practicum.filmorate.storage.film.dao.LikeStorageDao;
+import ru.yandex.practicum.filmorate.storage.user.dao.EventStorageDao;
 import ru.yandex.practicum.filmorate.storage.user.dao.UserStorageDao;
 
 import java.util.List;
@@ -25,6 +27,7 @@ public class FilmService {
     private final UserStorageDao userStorage;
     private final LikeStorageDao likeStorage;
     private final GenreStorageDao genreStorage;
+    private final EventStorageDao eventStorage;
     private final DirectorStorageDao directorStorage;
 
     public List<Film> findAll() {
@@ -113,6 +116,7 @@ public class FilmService {
         }
         log.info("Пользователь {} поставил лайк фильму {}", userId, filmId);
         likeStorage.addLike(filmId, userId);
+        eventStorage.add(userId, EventType.LIKE, OperationType.ADD, filmId);
     }
 
     public void deleteLike(Long filmId, Long userId) {
@@ -121,6 +125,7 @@ public class FilmService {
         }
         log.info("Пользователь {} удалил лайк у фильма {}", userId, filmId);
         likeStorage.deleteLike(filmId, userId);
+        eventStorage.add(userId, EventType.LIKE, OperationType.REMOVE, filmId);
     }
 
     public List<Film> findCommonFilms(Long userId, Long friendId) {

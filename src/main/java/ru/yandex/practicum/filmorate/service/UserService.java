@@ -4,7 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.model.entity.Event;
+import ru.yandex.practicum.filmorate.model.entity.EventType;
+import ru.yandex.practicum.filmorate.model.entity.OperationType;
 import ru.yandex.practicum.filmorate.model.entity.User;
+import ru.yandex.practicum.filmorate.storage.user.dao.EventStorageDao;
 import ru.yandex.practicum.filmorate.storage.user.dao.FriendStorageDao;
 import ru.yandex.practicum.filmorate.storage.user.dao.UserStorageDao;
 
@@ -17,6 +21,7 @@ import java.util.List;
 public class UserService {
     private final UserStorageDao userStorage;
     private final FriendStorageDao friendStorage;
+    private final EventStorageDao eventStorage;
 
     public Collection<User> findAll() {
         log.info("Получение списка всех пользователей");
@@ -73,6 +78,7 @@ public class UserService {
             throw new ObjectNotFoundException("Вызов несуществующего объекта");
         }
         log.info("Пользователь {} добавил {}", userId, friendId);
+        eventStorage.add(userId, EventType.FRIEND, OperationType.ADD, friendId);
         friendStorage.addFriend(userId, friendId);
     }
 
@@ -81,6 +87,7 @@ public class UserService {
             throw new ObjectNotFoundException("Вызов несуществующего объекта");
         }
         log.info("Пользователь {} удалил {}", userId, friendId);
+        eventStorage.add(userId, EventType.FRIEND, OperationType.REMOVE, friendId);
         friendStorage.deleteFriend(userId, friendId);
     }
 
@@ -99,5 +106,14 @@ public class UserService {
         }
         log.info("Получение общих друзей пользователей с id {} и {}", userId, otherId);
         return friendStorage.findMutualFriends(userId, otherId);
+    }
+
+    public List<Event> getFeed(Long userId) {
+        if (!userStorage.existsById(userId)) {
+            log.warn("Пользователь с id {} не найден", userId);
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+        }
+        log.info("Получение ленты пользователя с id {}", userId);
+        return userStorage.getFeed(userId);
     }
 }
