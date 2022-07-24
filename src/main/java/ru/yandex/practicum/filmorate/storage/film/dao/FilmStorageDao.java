@@ -20,4 +20,8 @@ public interface FilmStorageDao {
     boolean existsById(Long filmId);
 
     List<Film> findCommonFilmsForUsers(Long userId, Long friendId);
+
+	List<Film> findFilmsByDirector(Long directorId, String sortBy);
+
+    List<Film> getRecommendations(Long userId);
 }
