@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS REVIEW_REACTIONS
     user_id     int REFERENCES USERS (user_id) ON DELETE CASCADE,
     reaction_id int REFERENCES REACTIONS (reaction_id),
     PRIMARY KEY (review_id, user_id)
+);
 
 CREATE TABLE IF NOT EXISTS DIRECTORS
 (
@@ -94,4 +95,14 @@ CREATE TABLE IF NOT EXISTS FILM_DIRECTORS
     film_id  int REFERENCES FILMS (film_id) ON DELETE CASCADE,
     director_id int REFERENCES DIRECTORS (director_id) ON DELETE CASCADE,
     PRIMARY KEY (film_id, director_id)
+);
+
+CREATE TABLE IF NOT EXISTS EVENTS
+(
+    event_id        int AUTO_INCREMENT PRIMARY KEY,
+    user_id         int REFERENCES USERS (user_id) ON DELETE CASCADE,
+    event_time      time,
+    event_type      varchar(6),
+    operation_type  varchar(6),
+    entity_id       int
 );
