@@ -5,7 +5,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.model.entity.Event;
 import ru.yandex.practicum.filmorate.model.entity.User;
+import ru.yandex.practicum.filmorate.storage.mapper.EventMapper;
 import ru.yandex.practicum.filmorate.storage.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.storage.user.dao.UserStorageDao;
 
@@ -18,6 +20,7 @@ import java.util.Objects;
 public class UserDbStorage implements UserStorageDao {
     private final JdbcTemplate jdbcTemplate;
     private final UserMapper userMapper;
+    private final EventMapper eventMapper;
 
     public static final String SQL_QUERY_FIND_ALL_USERS = "SELECT * FROM USERS";
     public static final String SQL_QUERY_FIND_USER_BY_ID = "SELECT * FROM USERS WHERE USER_ID = ?";
@@ -27,6 +30,7 @@ public class UserDbStorage implements UserStorageDao {
             "SET email = ?, login = ?, name = ?, birthday = ? WHERE USER_ID = ?";
     public static final String SQL_QUERY_DELETE_USER = "DELETE FROM USERS WHERE USER_ID = ?";
     private static final String SQL_QUERY_CHECK_USER = "SELECT COUNT(*) FROM USERS WHERE USER_ID = ?";
+    private static final String SQL_QUERY_FIND_EVENTS = "SELECT * FROM EVENTS WHERE USER_ID = ?";
 
     @Override
     public List<User> findAll() {
@@ -75,5 +79,10 @@ public class UserDbStorage implements UserStorageDao {
         Integer count = jdbcTemplate.queryForObject(SQL_QUERY_CHECK_USER, Integer.class, userId);
         assert count != null;
         return count.equals(1);
+    }
+
+    @Override
+    public List<Event> getFeed(Long userId) {
+        return jdbcTemplate.query(SQL_QUERY_FIND_EVENTS, eventMapper, userId);
     }
 }
