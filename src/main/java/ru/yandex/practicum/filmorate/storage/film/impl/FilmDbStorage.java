@@ -160,7 +160,7 @@ public class FilmDbStorage implements FilmStorageDao {
         String joinGenres = "LEFT JOIN FILM_GENRES FG ON FG.FILM_ID = F.FILM_ID ";
         String whereGenres = "WHERE FG.GENRE_ID  = :genreId ";
         String whereYear = "WHERE YEAR(F.RELEASE_DATE) = :year ";
-        String group = "GROUP BY F.FILM_ID ORDER BY COUNT(DISTINCT FL.USER_ID) DESC LIMIT :count";
+        String group = "GROUP BY F.FILM_ID, FL.USER_ID ORDER BY COUNT(DISTINCT FL.USER_ID) DESC LIMIT :count";
         MapSqlParameterSource params = new MapSqlParameterSource("count", count);
         FilmSearchStrategy strategy = getStrategyByYearAndGenre(genreId, year);
         switch (strategy) {
