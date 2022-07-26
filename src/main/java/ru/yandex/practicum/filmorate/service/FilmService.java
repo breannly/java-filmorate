@@ -98,7 +98,7 @@ public class FilmService {
 
     public List<Film> findPopularFilms(int count, Long genreId, int year) {
         log.info("Получение {} фильмов", count);
-        if (genreId != 0 && (!genreStorage.existsById(genreId)))
+        if (genreId != null && (!genreStorage.existsById(genreId)))
             throw new ObjectNotFoundException("Вызов несуществующего объекта");
         List<Film> popularFilms = filmStorage.findPopularFilms(count, genreId, year);
         popularFilms.forEach(film -> {

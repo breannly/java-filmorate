@@ -23,6 +23,7 @@ import static ru.yandex.practicum.filmorate.config.FilmSearchStrategy.*;
 public class FilmDbStorage implements FilmStorageDao {
     private final JdbcTemplate jdbcTemplate;
     private final FilmMapper filmMapper;
+    private final NamedParameterJdbcTemplate namedParameter;
 
     private static final String SQL_QUERY_FIND_ALL_FILMS = "SELECT * FROM FILMS AS ff " +
             "JOIN MPA AS m ON ff.mpa_id = m.mpa_id";
@@ -83,6 +84,23 @@ public class FilmDbStorage implements FilmStorageDao {
             "LEFT JOIN FILM_LIKES AS fl ON fl.FILM_ID = f.FILM_ID " +
             "LEFT JOIN FILM_DIRECTORS fd ON fd.FILM_ID = f.FILM_ID " +
             "LEFT JOIN DIRECTORS d ON d.DIRECTOR_ID = fd.DIRECTOR_ID ";
+
+    private static final String SQL_QUERY_SEARCH_POPULAR_FILM = SQL_QUERY_SEARCH_FILM +
+            "GROUP BY F.FILM_ID, FL.USER_ID ORDER BY COUNT(DISTINCT FL.USER_ID) DESC LIMIT :count";
+
+    private static final String SQL_QUERY_SEARCH_BY_YEAR_AND_GENRE = SQL_QUERY_SEARCH_FILM +
+            "LEFT JOIN FILM_GENRES FG ON FG.FILM_ID = F.FILM_ID " +
+            "WHERE FG.GENRE_ID = :genreId AND YEAR(F.RELEASE_DATE) = :year " +
+            "GROUP BY F.FILM_ID ORDER BY COUNT(DISTINCT FL.USER_ID) DESC LIMIT :count";
+
+    private static final String SQL_QUERY_SEARCH_BY_YEAR = SQL_QUERY_SEARCH_FILM +
+            "WHERE YEAR(F.RELEASE_DATE) = :year " +
+            "GROUP BY F.FILM_ID ORDER BY COUNT(DISTINCT FL.USER_ID) DESC LIMIT :count";
+
+    private static final String SQL_QUERY_SEARCH_BY_GENRE = SQL_QUERY_SEARCH_FILM +
+            "LEFT JOIN FILM_GENRES FG ON FG.FILM_ID = F.FILM_ID " +
+            "WHERE FG.GENRE_ID  = :genreId "+
+            "GROUP BY F.FILM_ID ORDER BY COUNT(DISTINCT FL.USER_ID) DESC LIMIT :count";
 
     @Override
     public List<Film> findAll() {
@@ -155,46 +173,27 @@ public class FilmDbStorage implements FilmStorageDao {
 
     @Override
     public List<Film> findPopularFilms(int count, Long genreId, int year) {
-        StringBuilder sqlStatement = new StringBuilder(SQL_QUERY_SEARCH_FILM);
-        String whereGenresAndYear = "WHERE FG.GENRE_ID = :genreId AND YEAR(F.RELEASE_DATE) = :year ";
-        String joinGenres = "LEFT JOIN FILM_GENRES FG ON FG.FILM_ID = F.FILM_ID ";
-        String whereGenres = "WHERE FG.GENRE_ID  = :genreId ";
-        String whereYear = "WHERE YEAR(F.RELEASE_DATE) = :year ";
-        String group = "GROUP BY F.FILM_ID, FL.USER_ID ORDER BY COUNT(DISTINCT FL.USER_ID) DESC LIMIT :count";
         MapSqlParameterSource params = new MapSqlParameterSource("count", count);
         FilmSearchStrategy strategy = getStrategyByYearAndGenre(genreId, year);
         switch (strategy) {
             case YEAR_AND_GENRE:
-                sqlStatement.append(joinGenres).append(whereGenresAndYear).append(group);
-                params.addValue("genreId", genreId)
-                        .addValue("year", year);
-                break;
-            case YEAR:
-                sqlStatement.append(whereYear).append(group);
-                params.addValue("year", year);
-                break;
+                params.addValue("genreId", genreId).addValue("year", year);
+                return namedParameter.query(SQL_QUERY_SEARCH_BY_YEAR_AND_GENRE, params, filmMapper);
             case GENRE:
-                sqlStatement.append(joinGenres).append(whereGenres).append(group);
                 params.addValue("genreId", genreId);
-                break;
+                return namedParameter.query(SQL_QUERY_SEARCH_BY_GENRE, params, filmMapper);
+            case YEAR:
+                params.addValue("year", year);
+                return namedParameter.query(SQL_QUERY_SEARCH_BY_YEAR, params, filmMapper);
             default:
-                sqlStatement.append(group);
-                break;
+                return namedParameter.query(SQL_QUERY_SEARCH_POPULAR_FILM, params, filmMapper);
         }
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-        return namedParameterJdbcTemplate.query(sqlStatement.toString(), params, filmMapper);
     }
 
     private FilmSearchStrategy getStrategyByYearAndGenre(Long genreId, int year) {
-        if (genreId != 0 && year != 0) {
-            return YEAR_AND_GENRE;
-        }
-        if (genreId != 0) {
-            return GENRE;
-        }
-        if (year != 0) {
-            return YEAR;
-        }
+        if (genreId != null && year != 0) { return YEAR_AND_GENRE;}
+        if (genreId != null) { return GENRE;}
+        if (year != 0) { return YEAR;}
         return DEFAULT;
     }
 
@@ -205,7 +204,6 @@ public class FilmDbStorage implements FilmStorageDao {
         StringBuilder sqlQuery = new StringBuilder(SQL_QUERY_SEARCH_FILM);
         String groupBy = " GROUP BY f.FILM_ID ORDER BY COUNT(fl.USER_ID) DESC";
         FilmSearchStrategy strategy = getStrategyByTitleAndDirector(searchParams);
-
         switch (strategy) {
             case TITLE_AND_DIRECTOR:
                 sqlQuery.append("WHERE (LOWER(f.NAME) LIKE :textQuery OR LOWER(d.NAME) LIKE :textQuery)")
@@ -218,8 +216,7 @@ public class FilmDbStorage implements FilmStorageDao {
                 sqlQuery.append("WHERE LOWER(f.NAME) LIKE :textQuery").append(groupBy);
                 break;
         }
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-        return namedParameterJdbcTemplate.query(sqlQuery.toString(), params, filmMapper);
+        return namedParameter.query(sqlQuery.toString(), params, filmMapper);
     }
 
     private FilmSearchStrategy getStrategyByTitleAndDirector(List<String> searchParams) {
@@ -227,7 +224,6 @@ public class FilmDbStorage implements FilmStorageDao {
             return TITLE_AND_DIRECTOR;
         else if (searchParams.contains("director")) {
             return FilmSearchStrategy.DIRECTOR;
-        }
-        return FilmSearchStrategy.TITLE;
+        }          return FilmSearchStrategy.TITLE;
     }
 }
