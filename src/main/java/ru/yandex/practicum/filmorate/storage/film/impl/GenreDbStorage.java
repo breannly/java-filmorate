@@ -35,9 +35,11 @@ public class GenreDbStorage implements GenreStorageDao {
     }
 
     @Override
-    public List<Genre> add(Long filmId, List<Genre> genres) {
+    public List<Genre> addToFilm(Long filmId, List<Genre> genres) {
         jdbcTemplate.update(SQL_QUERY_DELETE_GENRES, filmId);
-        genres.forEach(genre -> jdbcTemplate.update(SQL_QUERY_ADD_GENRE, filmId, genre.getId()));
+        if (genres != null) {
+            genres.forEach(genre -> jdbcTemplate.update(SQL_QUERY_ADD_GENRE, filmId, genre.getId()));
+        }
         return findAllById(filmId);
     }
 

@@ -6,6 +6,8 @@ import ru.yandex.practicum.filmorate.model.entity.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 import java.util.List;
 
@@ -54,7 +56,7 @@ public class FilmController {
     @GetMapping("/popular")
     public List<Film> findPopularFilms(@RequestParam(defaultValue = "10") int count,
                                        @RequestParam(defaultValue = "0", required = false) Long genreId,
-                                       @RequestParam(defaultValue = "0", required = false) int year
+                                       @RequestParam(defaultValue = "0", required = false) @PositiveOrZero int year
     ) {
         return service.findPopularFilms(count, genreId, year);
     }
@@ -62,5 +64,17 @@ public class FilmController {
     @GetMapping("/common")
     public List<Film> findCommonFilms(@RequestParam("userId") Long userId, @RequestParam("friendId") Long friendId) {
         return service.findCommonFilms(userId, friendId);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> findDirectorsFilms(@PathVariable("directorId") Long directorId,
+                                         @RequestParam(value = "sortBy", defaultValue = "year") String sortBy) {
+        return service.findFilmsByDirector(directorId, sortBy);
+    }
+
+    @GetMapping("/search")
+    public List<Film> searchFilmsByNameOrDirector(@RequestParam String query,
+                                                  @RequestParam @NotNull List<String> by) {
+        return service.searchFilmsByNameOrDirector(query, by);
     }
 }
