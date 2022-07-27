@@ -24,27 +24,23 @@ public class ReviewService {
     private final EventStorageDao eventStorage;
 
     public List<Review> findAll(Long filmId, int count) {
-        if (filmId != 0 && (!filmStorage.existsById(filmId))) {
-            log.warn("Фильм с id {} не найден", filmId);
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        if (filmId != 0 ) checkExistsFilm(filmId);
+
         log.info("Получение отзывов по фильму {}", filmId);
         return reviewStorage.findAll(filmId, count);
     }
 
     public Review findById(Long reviewId) {
-        if (!reviewStorage.existsById(reviewId)) {
-            log.warn("Отзыв с id {} не найден", reviewId);
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        checkExistsReview(reviewId);
+
         log.info("Получение отзыва с id {}", reviewId);
         return reviewStorage.findById(reviewId);
     }
 
     public Review add(Review review) {
-        if (!(userStorage.existsById(review.getUserId()) && filmStorage.existsById(review.getFilmId()))) {
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        checkExistsUser(review.getUserId());
+        checkExistsFilm(review.getFilmId());
+
         Review addedReview = reviewStorage.add(review);
         eventStorage.add(review.getUserId(), EventType.REVIEW, OperationType.ADD, review.getReviewId());
         log.info("Добавление нового отзыва с id {}", addedReview.getReviewId());
@@ -52,9 +48,8 @@ public class ReviewService {
     }
 
     public Review update(Review review) {
-        if (!(userStorage.existsById(review.getUserId()) && filmStorage.existsById(review.getFilmId()))) {
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        checkExistsReview(review.getReviewId());
+
         log.info("Обновление отзыва с id {}", review.getReviewId());
         Long reviewAuthorId = findById(review.getReviewId()).getUserId();
         eventStorage.add(reviewAuthorId, EventType.REVIEW, OperationType.UPDATE, review.getReviewId());
@@ -62,10 +57,8 @@ public class ReviewService {
     }
 
     public void delete(Long reviewId) {
-        if (!reviewStorage.existsById(reviewId)) {
-            log.warn("Отзыв с id {} не найден", reviewId);
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        checkExistsReview(reviewId);
+
         log.info("Удаление отзыва с id {}", reviewId);
         Review review = findById(reviewId);
         eventStorage.add(review.getUserId(), EventType.REVIEW, OperationType.REMOVE, review.getReviewId());
@@ -73,34 +66,55 @@ public class ReviewService {
     }
 
     public void addLike(Long reviewId, Long userId) {
-        if (!(reviewStorage.existsById(reviewId) && userStorage.existsById(userId))) {
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        checkExistsReview(reviewId);
+        checkExistsUser(userId);
+
         log.info("Пользователь {} добавил лайк отзыву {}", reviewId, userId);
         reviewStorage.addLike(reviewId, userId);
     }
 
     public void addDislike(Long reviewId, Long userId) {
-        if (!(reviewStorage.existsById(reviewId) && userStorage.existsById(userId))) {
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        checkExistsReview(reviewId);
+        checkExistsUser(userId);
+
         log.info("Пользователь {} добавил дизлайк отзыву {}", reviewId, userId);
         reviewStorage.addDislike(reviewId, userId);
     }
 
     public void deleteLike(Long reviewId, Long userId) {
-        if (!(reviewStorage.existsById(reviewId) && userStorage.existsById(userId))) {
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        checkExistsReview(reviewId);
+        checkExistsUser(userId);
+
         log.info("Пользователь {} удалил лайк у отзыва {}", reviewId, userId);
         reviewStorage.deleteLike(reviewId, userId);
     }
 
     public void deleteDislike(Long reviewId, Long userId) {
-        if (!(reviewStorage.existsById(reviewId) && userStorage.existsById(userId))) {
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        checkExistsReview(reviewId);
+        checkExistsUser(userId);
+
         log.info("Пользователь {} удалил дизлайк у отзыва {}", reviewId, userId);
         reviewStorage.deleteDislike(reviewId, userId);
+    }
+
+    private void checkExistsReview(Long reviewId) {
+        if (!reviewStorage.existsById(reviewId)) {
+            log.warn("Пользователь с id {} не найден", reviewId);
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+        }
+    }
+
+    private void checkExistsUser(Long userId) {
+        if (!userStorage.existsById(userId)) {
+            log.warn("Пользователь с id {} не найден", userId);
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+        }
+    }
+
+    private void checkExistsFilm(Long filmId) {
+        if (!filmStorage.existsById(filmId)) {
+            log.warn("Фильм с id {} не найден", filmId);
+            throw new ObjectNotFoundException("Фильм не найден");
+        }
     }
 }

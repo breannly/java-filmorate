@@ -21,10 +21,8 @@ public class DirectorService {
     }
 
     public Director findById(Long directorId) {
-        if (!directorStorage.existsById(directorId)) {
-            log.warn("Режиссер с id {} не найден", directorId);
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        checkExistsDirector(directorId);
+
         log.info("Получение жанра с id {}", directorId);
         return directorStorage.findById(directorId);
     }
@@ -36,20 +34,23 @@ public class DirectorService {
     }
 
     public Director update(Director director) {
-        if (!directorStorage.existsById(director.getId())) {
-            log.warn("Режиссер с id {} не найден", director.getId());
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        checkExistsDirector(director.getId());
+
         log.info("Обновление режиссера с id {}", director.getId());
         return directorStorage.update(director);
     }
 
     public void deleteDirector(Long directorId) {
+        checkExistsDirector(directorId);
+
+        log.info("Удаление режиссера с id {}", directorId);
+        directorStorage.deleteDirector(directorId);
+    }
+
+    private void checkExistsDirector(Long directorId) {
         if (!directorStorage.existsById(directorId)) {
             log.warn("Режиссер с id {} не найден", directorId);
             throw new ObjectNotFoundException("Вызов несуществующего объекта");
         }
-        log.info("Удаление режиссера с id {}", directorId);
-        directorStorage.deleteDirector(directorId);
     }
 }

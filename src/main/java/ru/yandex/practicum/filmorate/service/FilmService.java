@@ -52,10 +52,8 @@ public class FilmService {
 
     public Film update(Film film) {
         validate(film);
-        if (!filmStorage.existsById(film.getId())) {
-            log.warn("Фильм с id {} не найден", film.getId());
-            throw new ObjectNotFoundException("Фильм не найден");
-        }
+        checkExistsFilm(film.getId());
+
         filmStorage.update(film);
         genreStorage.addToFilm(film.getId(), film.getGenres());
         if (film.getGenres() != null) film.setGenres(genreStorage.findAllById(film.getId()));
@@ -67,10 +65,8 @@ public class FilmService {
     }
 
     public void deleteFilm(Long filmId) {
-        if (!filmStorage.existsById(filmId)) {
-            log.warn("Фильм с id {} не найден", filmId);
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        checkExistsFilm(filmId);
+
         log.info("Удаление фильма с id {}", filmId);
         filmStorage.deleteFilm(filmId);
     }
@@ -85,10 +81,8 @@ public class FilmService {
     }
 
     public Film findFilmById(Long filmId) {
-        if (!filmStorage.existsById(filmId)) {
-            log.warn("Фильм с id {} не найден", filmId);
-            throw new ObjectNotFoundException("Фильм не найден");
-        }
+        checkExistsFilm(filmId);
+
         Film foundFilm = filmStorage.findById(filmId);
         foundFilm.setGenres(genreStorage.findAllById(filmId));
         foundFilm.setDirectors(directorStorage.findAllById(filmId));
@@ -109,27 +103,27 @@ public class FilmService {
     }
 
     public void addLike(Long filmId, Long userId) {
-        if (!(filmStorage.existsById(filmId) && userStorage.existsById(userId))) {
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        checkExistsFilm(filmId);
+        checkExistsUser(userId);
+
         log.info("Пользователь {} поставил лайк фильму {}", userId, filmId);
         likeStorage.addLike(filmId, userId);
         eventStorage.add(userId, EventType.LIKE, OperationType.ADD, filmId);
     }
 
     public void deleteLike(Long filmId, Long userId) {
-        if (!(filmStorage.existsById(filmId) && userStorage.existsById(userId))) {
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        checkExistsFilm(filmId);
+        checkExistsUser(userId);
+
         log.info("Пользователь {} удалил лайк у фильма {}", userId, filmId);
         likeStorage.deleteLike(filmId, userId);
         eventStorage.add(userId, EventType.LIKE, OperationType.REMOVE, filmId);
     }
 
     public List<Film> findCommonFilms(Long userId, Long friendId) {
-        if (!(userStorage.existsById(userId) && userStorage.existsById(friendId))) {
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        checkExistsUser(userId);
+        checkExistsUser(friendId);
+
         log.info("Получение общих фильмов для пользователя {} и {}", userId, friendId);
         return filmStorage.findCommonFilmsForUsers(userId, friendId);
     }
@@ -148,10 +142,8 @@ public class FilmService {
     }
 
     public List<Film> getRecommendations(Long userId) {
-        if (!userStorage.existsById(userId)) {
-            log.warn("Пользователь с id {} не найден", userId);
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        checkExistsUser(userId);
+
         List<Film> recommendationsFilms = filmStorage.getRecommendations(userId);
         recommendationsFilms.forEach(f -> {
             f.setGenres(genreStorage.findAllById(f.getId()));
@@ -168,5 +160,19 @@ public class FilmService {
             film.setDirectors(directorStorage.findAllById(film.getId()));
         });
         return searchResult;
+    }
+
+    private void checkExistsFilm(Long filmId) {
+        if (!filmStorage.existsById(filmId)) {
+            log.warn("Фильм с id {} не найден", filmId);
+            throw new ObjectNotFoundException("Фильм не найден");
+        }
+    }
+
+    private void checkExistsUser(Long userId) {
+        if (!userStorage.existsById(userId)) {
+            log.warn("Пользователь с id {} не найден", userId);
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+        }
     }
 }
