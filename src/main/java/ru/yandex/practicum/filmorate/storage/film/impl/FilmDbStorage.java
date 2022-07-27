@@ -61,7 +61,7 @@ public class FilmDbStorage implements FilmStorageDao {
             "(" +
             "    SELECT film_id FROM FILM_DIRECTORS WHERE director_id = ? " +
             ")" +
-            "ORDER BY f.release_date ASC";
+            "ORDER BY f.release_date DESC ";
 
     private static final String SQL_QUERY_GET_RECOMMENDATION =
             "SELECT * FROM FILMS AS F " +
@@ -86,21 +86,21 @@ public class FilmDbStorage implements FilmStorageDao {
             "LEFT JOIN DIRECTORS d ON d.DIRECTOR_ID = fd.DIRECTOR_ID ";
 
     private static final String SQL_QUERY_SEARCH_POPULAR_FILM = SQL_QUERY_SEARCH_FILM +
-            "GROUP BY F.FILM_ID, FL.USER_ID ORDER BY COUNT(DISTINCT FL.USER_ID) DESC LIMIT :count";
+            "GROUP BY F.FILM_ID, FL.USER_ID ORDER BY COUNT(FL.USER_ID) DESC LIMIT ?";
 
     private static final String SQL_QUERY_SEARCH_BY_YEAR_AND_GENRE = SQL_QUERY_SEARCH_FILM +
             "LEFT JOIN FILM_GENRES FG ON FG.FILM_ID = F.FILM_ID " +
-            "WHERE FG.GENRE_ID = :genreId AND YEAR(F.RELEASE_DATE) = :year " +
-            "GROUP BY F.FILM_ID ORDER BY COUNT(DISTINCT FL.USER_ID) DESC LIMIT :count";
+            "WHERE FG.GENRE_ID = ? AND YEAR(F.RELEASE_DATE) = ? " +
+            "GROUP BY F.FILM_ID ORDER BY COUNT(FL.USER_ID) DESC LIMIT ?";
 
     private static final String SQL_QUERY_SEARCH_BY_YEAR = SQL_QUERY_SEARCH_FILM +
-            "WHERE YEAR(F.RELEASE_DATE) = :year " +
-            "GROUP BY F.FILM_ID ORDER BY COUNT(DISTINCT FL.USER_ID) DESC LIMIT :count";
+            "WHERE YEAR(F.RELEASE_DATE) = ? " +
+            "GROUP BY F.FILM_ID ORDER BY COUNT(FL.USER_ID) DESC LIMIT ?";
 
     private static final String SQL_QUERY_SEARCH_BY_GENRE = SQL_QUERY_SEARCH_FILM +
             "LEFT JOIN FILM_GENRES FG ON FG.FILM_ID = F.FILM_ID " +
-            "WHERE FG.GENRE_ID  = :genreId "+
-            "GROUP BY F.FILM_ID ORDER BY COUNT(DISTINCT FL.USER_ID) DESC LIMIT :count";
+            "WHERE FG.GENRE_ID  = ? " +
+            "GROUP BY F.FILM_ID ORDER BY COUNT(FL.USER_ID) DESC LIMIT ?";
 
     @Override
     public List<Film> findAll() {
@@ -173,28 +173,20 @@ public class FilmDbStorage implements FilmStorageDao {
 
     @Override
     public List<Film> findPopularFilms(int count, Long genreId, int year) {
-        MapSqlParameterSource params = new MapSqlParameterSource("count", count);
-        FilmSearchStrategy strategy = getStrategyByYearAndGenre(genreId, year);
-        switch (strategy) {
-            case YEAR_AND_GENRE:
-                params.addValue("genreId", genreId).addValue("year", year);
-                return namedParameter.query(SQL_QUERY_SEARCH_BY_YEAR_AND_GENRE, params, filmMapper);
-            case GENRE:
-                params.addValue("genreId", genreId);
-                return namedParameter.query(SQL_QUERY_SEARCH_BY_GENRE, params, filmMapper);
-            case YEAR:
-                params.addValue("year", year);
-                return namedParameter.query(SQL_QUERY_SEARCH_BY_YEAR, params, filmMapper);
-            default:
-                return namedParameter.query(SQL_QUERY_SEARCH_POPULAR_FILM, params, filmMapper);
+        if (genreId == null && year == 0) {
+            return jdbcTemplate.query(SQL_QUERY_SEARCH_POPULAR_FILM, filmMapper, count);
         }
+        return findPopularFilmsByYearOrGenre(count, genreId, year);
     }
 
-    private FilmSearchStrategy getStrategyByYearAndGenre(Long genreId, int year) {
-        if (genreId != null && year != 0) { return YEAR_AND_GENRE;}
-        if (genreId != null) { return GENRE;}
-        if (year != 0) { return YEAR;}
-        return DEFAULT;
+    private List<Film> findPopularFilmsByYearOrGenre(int count, Long genreId, int year) {
+        if (year != 0 && genreId == null) {
+            return jdbcTemplate.query(SQL_QUERY_SEARCH_BY_YEAR, filmMapper, year, count);
+        }
+        if (genreId != null && year == 0) {
+            return jdbcTemplate.query(SQL_QUERY_SEARCH_BY_GENRE, filmMapper, genreId, count);
+        }
+        return jdbcTemplate.query(SQL_QUERY_SEARCH_BY_YEAR_AND_GENRE, filmMapper, genreId, year, count);
     }
 
     @Override
@@ -220,10 +212,12 @@ public class FilmDbStorage implements FilmStorageDao {
     }
 
     private FilmSearchStrategy getStrategyByTitleAndDirector(List<String> searchParams) {
-        if (searchParams.size() == 2)
+        if (searchParams.size() == 2) {
             return TITLE_AND_DIRECTOR;
-        else if (searchParams.contains("director")) {
+        }
+        if (searchParams.contains("director")) {
             return FilmSearchStrategy.DIRECTOR;
-        }          return FilmSearchStrategy.TITLE;
+        }
+        return FilmSearchStrategy.TITLE;
     }
 }
