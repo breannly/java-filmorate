@@ -160,9 +160,9 @@ public class FilmService {
         return recommendationsFilms;
     }
 
-    public List<Film> searchFilmsByNameOrDirector(String textQuery, List<String> searchParams) {
+    public List<Film> searchFilms(String textQuery, List<String> searchParams) {
         List<Film> searchResult = filmStorage.searchFilmsByNameOrDirector(textQuery, searchParams);
-        log.info("Поиск фильма по запросу {} ",textQuery);
+        log.info("Поиск фильма по запросу {} ", textQuery);
         searchResult.forEach(film -> {
             film.setGenres(genreStorage.findAllById(film.getId()));
             film.setDirectors(directorStorage.findAllById(film.getId()));

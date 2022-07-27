@@ -34,7 +34,7 @@ public class FilmController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable("id") Long id){
+    public void deleteUser(@PathVariable("id") Long id) {
         service.deleteFilm(id);
     }
 
@@ -73,8 +73,8 @@ public class FilmController {
     }
 
     @GetMapping("/search")
-    public List<Film> searchFilmsByNameOrDirector(@RequestParam String query,
-                                                  @RequestParam @NotNull List<String> by) {
-        return service.searchFilmsByNameOrDirector(query, by);
+    public List<Film> searchFilms(@RequestParam String query,
+                                  @RequestParam @NotNull List<String> by) {
+        return service.searchFilms(query, by);
     }
 }
