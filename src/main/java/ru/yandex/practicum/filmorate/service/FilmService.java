@@ -98,7 +98,7 @@ public class FilmService {
 
     public List<Film> findPopularFilms(int count, Long genreId, int year) {
         log.info("Получение {} фильмов", count);
-        if (genreId != 0 && (!genreStorage.existsById(genreId)))
+        if (genreId != null && (!genreStorage.existsById(genreId)))
             throw new ObjectNotFoundException("Вызов несуществующего объекта");
         List<Film> popularFilms = filmStorage.findPopularFilms(count, genreId, year);
         popularFilms.forEach(film -> {
@@ -161,9 +161,9 @@ public class FilmService {
         return recommendationsFilms;
     }
 
-    public List<Film> searchFilmsByNameOrDirector(String textQuery, List<String> searchParams) {
+    public List<Film> searchFilms(String textQuery, List<String> searchParams) {
         List<Film> searchResult = filmStorage.searchFilmsByNameOrDirector(textQuery, searchParams);
-        log.info("Поиск фильма по запросу {} ",textQuery);
+        log.info("Поиск фильма по запросу {} ", textQuery);
         searchResult.forEach(film -> {
             film.setGenres(genreStorage.findAllById(film.getId()));
             film.setDirectors(directorStorage.findAllById(film.getId()));
