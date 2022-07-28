@@ -6,6 +6,8 @@ import ru.yandex.practicum.filmorate.model.entity.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 import java.util.List;
 
@@ -31,8 +33,13 @@ public class FilmController {
         return service.update(film);
     }
 
+    @DeleteMapping("/{id}")
+    public void deleteFilm(@PathVariable("id") Long id) {
+        service.deleteFilm(id);
+    }
+
     @GetMapping("/{id}")
-    public Film getFilmById(@PathVariable("id") Long filmId) {
+    public Film findFilmById(@PathVariable("id") Long filmId) {
         return service.findFilmById(filmId);
     }
 
@@ -47,7 +54,27 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getFilms(@RequestParam(defaultValue = "10") int count) {
-        return service.getFilms(count);
+    public List<Film> findPopularFilms(@RequestParam(defaultValue = "10") int count,
+                                       @RequestParam(required = false) Long genreId,
+                                       @RequestParam(defaultValue = "0", required = false) @PositiveOrZero int year
+    ) {
+        return service.findPopularFilms(count, genreId, year);
+    }
+
+    @GetMapping("/common")
+    public List<Film> findCommonFilms(@RequestParam("userId") Long userId, @RequestParam("friendId") Long friendId) {
+        return service.findCommonFilms(userId, friendId);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> findDirectorsFilms(@PathVariable("directorId") Long directorId,
+                                         @RequestParam(value = "sortBy", defaultValue = "year") String sortBy) {
+        return service.findFilmsByDirector(directorId, sortBy);
+    }
+
+    @GetMapping("/search")
+    public List<Film> searchFilms(@RequestParam String query,
+                                  @RequestParam @NotNull List<String> by) {
+        return service.searchFilms(query, by);
     }
 }
