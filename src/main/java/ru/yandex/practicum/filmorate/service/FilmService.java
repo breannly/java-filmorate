@@ -8,10 +8,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.entity.EventType;
 import ru.yandex.practicum.filmorate.model.entity.Film;
 import ru.yandex.practicum.filmorate.model.entity.OperationType;
-import ru.yandex.practicum.filmorate.storage.film.dao.DirectorStorageDao;
-import ru.yandex.practicum.filmorate.storage.film.dao.FilmStorageDao;
-import ru.yandex.practicum.filmorate.storage.film.dao.GenreStorageDao;
-import ru.yandex.practicum.filmorate.storage.film.dao.LikeStorageDao;
+import ru.yandex.practicum.filmorate.storage.film.dao.*;
 import ru.yandex.practicum.filmorate.storage.user.dao.EventStorageDao;
 import ru.yandex.practicum.filmorate.storage.user.dao.UserStorageDao;
 
@@ -25,10 +22,10 @@ import static ru.yandex.practicum.filmorate.config.Config.validateDate;
 public class FilmService {
     private final FilmStorageDao filmStorage;
     private final UserStorageDao userStorage;
-    private final LikeStorageDao likeStorage;
     private final GenreStorageDao genreStorage;
     private final EventStorageDao eventStorage;
     private final DirectorStorageDao directorStorage;
+    private final MarkStorageDao markStorage;
 
     public List<Film> findAll() {
         log.info("Получение списка всех фильмов");
@@ -102,22 +99,13 @@ public class FilmService {
         return popularFilms;
     }
 
-    public void addLike(Long filmId, Long userId) {
+    public void addMark(Long filmId, Long userId, int mark) {
         checkExistsFilm(filmId);
         checkExistsUser(userId);
 
-        log.info("Пользователь {} поставил лайк фильму {}", userId, filmId);
-        likeStorage.addLike(filmId, userId);
-        eventStorage.add(userId, EventType.LIKE, OperationType.ADD, filmId);
-    }
-
-    public void deleteLike(Long filmId, Long userId) {
-        checkExistsFilm(filmId);
-        checkExistsUser(userId);
-
-        log.info("Пользователь {} удалил лайк у фильма {}", userId, filmId);
-        likeStorage.deleteLike(filmId, userId);
-        eventStorage.add(userId, EventType.LIKE, OperationType.REMOVE, filmId);
+        log.info("Пользователь {} поставил фильму {} оценку {}", userId, filmId, mark);
+        markStorage.addMark(filmId, userId, mark);
+        eventStorage.add(userId, EventType.RATE, OperationType.ADD, filmId);
     }
 
     public List<Film> findCommonFilms(Long userId, Long friendId) {
