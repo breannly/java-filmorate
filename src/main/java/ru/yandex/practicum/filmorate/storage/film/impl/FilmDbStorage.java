@@ -39,18 +39,18 @@ public class FilmDbStorage implements FilmStorageDao {
 
     private static final String SQL_QUERY_FIND_COMMON_FILMS = "SELECT f.*, m.* FROM FILMS AS f " +
             "JOIN MPA AS m ON f.mpa_id = m.mpa_id " +
-            "LEFT JOIN FILM_LIKES AS fl ON f.film_id = fl.film_id " +
+            "LEFT JOIN FILM_MARKS AS fl ON f.film_id = fl.film_id " +
             "WHERE f.film_id IN " +
             "(" +
-            "    SELECT film_id FROM FILM_LIKES WHERE user_id = ? " +
+            "    SELECT film_id FROM FILM_MARKS WHERE user_id = ? " +
             "    INTERSECT " +
-            "    SELECT film_id FROM FILM_LIKES WHERE user_id = ? " +
+            "    SELECT film_id FROM FILM_MARKS WHERE user_id = ? " +
             ") " +
             SQL_QUERY_GROUP_BY_LIKE;
 
     private static final String SQL_QUERY_FIND_FILMS_BY_DIRECTOR_SORT_BY_LIKES = "SELECT f.*, m.* FROM FILMS AS f " +
             "JOIN MPA AS m ON f.mpa_id = m.mpa_id " +
-            "LEFT JOIN FILM_LIKES AS fl ON f.film_id = fl.film_id " +
+            "LEFT JOIN FILM_MARKS AS fl ON f.film_id = fl.film_id " +
             "WHERE f.film_id IN " +
             "(" +
             "    SELECT film_id FROM FILM_DIRECTORS WHERE director_id = ? " +
@@ -70,20 +70,20 @@ public class FilmDbStorage implements FilmStorageDao {
                     "JOIN MPA AS M ON F.MPA_ID = M.MPA_ID " +
                     "WHERE FILM_ID IN (" +
                     "    SELECT FILM_ID" +
-                    "    FROM FILM_LIKES" +
+                    "    FROM FILM_MARKS" +
                     "    WHERE USER_ID = (" +
                     "        SELECT TOP (1) USER_ID" +
-                    "        FROM FILM_LIKES" +
+                    "        FROM FILM_MARKS" +
                     "        WHERE FILM_ID IN" +
-                    "              (SELECT FILM_ID FROM FILM_LIKES WHERE USER_ID = ?)" +
+                    "              (SELECT FILM_ID FROM FILM_MARKS WHERE USER_ID = ?)" +
                     "          AND USER_ID != ?" +
                     "        GROUP BY USER_ID" +
                     "        ORDER BY COUNT(FILM_ID) DESC)" +
-                    "      AND FILM_ID NOT IN (SELECT FILM_ID FROM FILM_LIKES WHERE USER_ID = ?))";
+                    "      AND FILM_ID NOT IN (SELECT FILM_ID FROM FILM_MARKS WHERE USER_ID = ?))";
 
     private static final String SQL_QUERY_SEARCH_FILM = "SELECT * FROM FILMS f " +
             "JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
-            "LEFT JOIN FILM_LIKES AS FL ON FL.FILM_ID = F.FILM_ID " +
+            "LEFT JOIN FILM_MARKS AS FL ON FL.FILM_ID = F.FILM_ID " +
             "LEFT JOIN FILM_DIRECTORS FD ON FD.FILM_ID = F.FILM_ID " +
             "LEFT JOIN DIRECTORS D ON D.DIRECTOR_ID = FD.DIRECTOR_ID ";
 
