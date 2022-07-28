@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS FILMS
     description  varchar(255),
     release_date date,
     duration     int,
+    rate         float,
     mpa_id       int REFERENCES MPA (mpa_id)
 );
 
@@ -54,9 +55,9 @@ CREATE TABLE IF NOT EXISTS FILM_GENRES
 
 CREATE TABLE IF NOT EXISTS FILM_MARKS
 (
-    film_id int REFERENCES FILMS (film_id) ON DELETE CASCADE,
-    user_id int REFERENCES USERS (user_id) ON DELETE CASCADE,
-    film_mark   int,
+    film_id   int REFERENCES FILMS (film_id) ON DELETE CASCADE,
+    user_id   int REFERENCES USERS (user_id) ON DELETE CASCADE,
+    film_mark int,
     PRIMARY KEY (film_id, user_id)
 );
 
