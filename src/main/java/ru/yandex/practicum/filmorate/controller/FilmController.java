@@ -6,6 +6,8 @@ import ru.yandex.practicum.filmorate.model.entity.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
@@ -46,9 +48,14 @@ public class FilmController {
     @PutMapping("/{id}/like/{userId}")
     public void addRating(@PathVariable("id") Long filmId,
                         @PathVariable Long userId,
-                        @RequestParam(defaultValue = "10", required = false) @PositiveOrZero int mark
+                        @RequestParam(defaultValue = "10", required = false) @Min(1) @Max(10) int mark
     ) {
         service.addMark(filmId, userId, mark);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public void deleteLike(@PathVariable("id") Long filmId, @PathVariable Long userId) {
+        service.deleteMark(filmId, userId);
     }
 
     @GetMapping("/popular")

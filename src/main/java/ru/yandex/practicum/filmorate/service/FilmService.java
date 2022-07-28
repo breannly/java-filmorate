@@ -105,9 +105,19 @@ public class FilmService {
 
         log.info("Пользователь {} поставил фильму {} оценку {}", userId, filmId, mark);
         markStorage.addMark(filmId, userId, mark);
-        eventStorage.add(userId, EventType.RATE, OperationType.ADD, filmId);
+        markStorage.updateFilmAverageRate(filmId);
+        eventStorage.add(userId, EventType.MARK, OperationType.ADD, filmId);
     }
 
+    public void deleteMark(Long filmId, Long userId) {
+        checkExistsFilm(filmId);
+        checkExistsUser(userId);
+
+        log.info("Пользователь {} удалил оценку у фильма {}", userId, filmId);
+        markStorage.deleteMark(filmId, userId);
+        markStorage.updateFilmAverageRate(filmId);
+        eventStorage.add(userId, EventType.MARK, OperationType.REMOVE, filmId);
+    }
     public List<Film> findCommonFilms(Long userId, Long friendId) {
         checkExistsUser(userId);
         checkExistsUser(friendId);
