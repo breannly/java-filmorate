@@ -72,14 +72,12 @@ public class FilmDbStorage implements FilmStorageDao {
                     "    SELECT FILM_ID" +
                     "    FROM FILM_MARKS" +
                     "    WHERE USER_ID = (" +
-                    "        SELECT TOP (1) USER_ID" +
-                    "        FROM FILM_MARKS" +
-                    "        WHERE FILM_ID IN" +
-                    "              (SELECT FILM_ID FROM FILM_MARKS WHERE USER_ID = ?)" +
-                    "          AND USER_ID != ?" +
-                    "        GROUP BY USER_ID" +
-                    "        ORDER BY COUNT(FILM_ID) DESC)" +
-                    "      AND FILM_ID NOT IN (SELECT FILM_ID FROM FILM_MARKS WHERE USER_ID = ?))";
+                    "        SELECT F2.USER_ID FROM FILM_MARKS AS F1 " +
+                    "        JOIN FILM_MARKS AS F2 ON F2.FILM_MARK = F1.FILM_MARK AND F1.FILM_MARK != F2.FILM_MARK " +
+                    "        WHERE F1.USER_ID = ? " +
+                    "        GROUP BY F1.USER_ID, F2.USER_ID " +
+                    "        ORDER BY COUNT(*) DESC )" +
+                    "AND FILM_ID NOT IN (SELECT FILM_ID FROM FILM_MARKS WHERE USER_ID = ?)) AND RATE > 5";
 
     private static final String SQL_QUERY_SEARCH_FILM = "SELECT * FROM FILMS f " +
             "JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
