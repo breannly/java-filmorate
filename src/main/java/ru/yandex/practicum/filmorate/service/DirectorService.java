@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.entity.Director;
 import ru.yandex.practicum.filmorate.storage.film.dao.DirectorStorageDao;
 
@@ -17,20 +16,20 @@ public class DirectorService {
     private final ValidationService validationService;
 
     public List<Director> findAll() {
-        log.info("Получение списка всех жанров");
+        log.info("Получение списка всех режиссеров");
         return directorStorage.findAll();
     }
 
     public Director findById(Long directorId) {
         validationService.checkExistsDirector(directorId);
 
-        log.info("Получение жанра с id {}", directorId);
+        log.info("Получение режиссера с id {}", directorId);
         return directorStorage.findById(directorId);
     }
 
     public Director add(Director director) {
         Director addedDirector = directorStorage.add(director);
-        log.info("Добавление нового режиссетра с id {}", addedDirector.getId());
+        log.info("Добавление нового режиссера с id {}", addedDirector.getId());
         return addedDirector;
     }
 
@@ -47,5 +46,4 @@ public class DirectorService {
         log.info("Удаление режиссера с id {}", directorId);
         directorStorage.deleteDirector(directorId);
     }
-
 }

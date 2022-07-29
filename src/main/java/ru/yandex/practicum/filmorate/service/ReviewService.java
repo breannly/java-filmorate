@@ -18,8 +18,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
-    private final ReviewStorageDao reviewStorage;
     private final EventStorageDao eventStorage;
+    private final ReviewStorageDao reviewStorage;
     private final ValidationService validationService;
 
     public List<Review> findAll(Long filmId, int count) {

@@ -14,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GenreService {
     private final GenreStorageDao genreStorage;
+    private final ValidationService validationService;
 
     public List<Genre> findAll() {
         log.info("Получение списка всех жанров");
@@ -21,10 +22,8 @@ public class GenreService {
     }
 
     public Genre findGenreById(Long genreId) {
-        if (!genreStorage.existsById(genreId)) {
-            log.warn("Жанр с id {} не найден", genreId);
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        validationService.checkExistsGenre(genreId);
+
         log.info("Получение жанра с id {}", genreId);
         return genreStorage.findById(genreId);
     }

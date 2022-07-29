@@ -2,10 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.entity.EventType;
 import ru.yandex.practicum.filmorate.model.entity.Film;
 import ru.yandex.practicum.filmorate.model.entity.OperationType;
@@ -14,18 +11,15 @@ import ru.yandex.practicum.filmorate.storage.film.dao.FilmStorageDao;
 import ru.yandex.practicum.filmorate.storage.film.dao.GenreStorageDao;
 import ru.yandex.practicum.filmorate.storage.film.dao.MarkStorageDao;
 import ru.yandex.practicum.filmorate.storage.user.dao.EventStorageDao;
-import ru.yandex.practicum.filmorate.storage.user.dao.UserStorageDao;
 
 import java.util.List;
 
-import static ru.yandex.practicum.filmorate.config.Config.validateDate;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class FilmService {
     private final FilmStorageDao filmStorage;
-    private final LikeStorageDao likeStorage;
     private final GenreStorageDao genreStorage;
     private final EventStorageDao eventStorage;
     private final DirectorStorageDao directorStorage;
@@ -85,8 +79,7 @@ public class FilmService {
     }
 
     public List<Film> findPopularFilms(int count, Long genreId, int year) {
-        if (genreId != null && (!genreStorage.existsById(genreId)))
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+        if (genreId != null) validationService.checkExistsGenre(genreId);
         List<Film> popularFilms = filmStorage.findPopularFilms(count, genreId, year);
         popularFilms.forEach(film -> {
             film.setGenres(genreStorage.findAllById(film.getId()));
@@ -124,9 +117,7 @@ public class FilmService {
     }
 
     public List<Film> findFilmsByDirector(Long directorId, String sortBy) {
-        if (!(directorStorage.existsById(directorId))) {
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        validationService.checkExistsDirector(directorId);
         log.info("Получение фильмов режиссера {} отсортированных по {}", directorId, sortBy);
         List<Film> films = filmStorage.findFilmsByDirector(directorId, sortBy);
         films.forEach(film -> {

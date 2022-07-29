@@ -20,8 +20,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
     private final UserStorageDao userStorage;
-    private final FriendStorageDao friendStorage;
     private final EventStorageDao eventStorage;
+    private final FriendStorageDao friendStorage;
     private final ValidationService validationService;
 
     public Collection<User> findAll() {
