@@ -30,7 +30,7 @@ public class UserService {
     }
 
     public User add(User user) {
-        validationService.validateUser(user);
+        validationService.validate(user);
         User addedUser = userStorage.add(user);
         log.info("Добавление нового пользователя с id {}", addedUser.getId());
 
@@ -39,7 +39,7 @@ public class UserService {
 
     public User update(User user) {
         validationService.checkExistsUser(user.getId());
-        validationService.validateUser(user);
+        validationService.validate(user);
 
         log.info("Обновление пользователя с id {}", user.getId());
         return userStorage.update(user);

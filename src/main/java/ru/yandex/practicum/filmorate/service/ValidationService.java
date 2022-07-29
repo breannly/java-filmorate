@@ -26,7 +26,7 @@ public class ValidationService {
     private DirectorStorageDao directorStorage;
     private ReviewStorageDao reviewStorage;
 
-    protected void validateFilm(Film film) {
+    protected void validate(Film film) {
         boolean isWrongReleaseDate = film.getReleaseDate().isBefore(validateDate);
 
         if (isWrongReleaseDate) {
@@ -35,7 +35,7 @@ public class ValidationService {
         }
     }
 
-    protected void validateUser(User user) {
+    protected void validate(User user) {
         boolean isWrongName = user.getName().isBlank();
 
         if (isWrongName) {
@@ -44,10 +44,11 @@ public class ValidationService {
         }
     }
 
+
     protected void checkExistsFilm(Long filmId) {
         if (!filmStorage.existsById(filmId)) {
             log.warn("Фильм с id {} не найден", filmId);
-            throw new ObjectNotFoundException("Фильм не найден");
+            throw new ObjectNotFoundException("Вызов несуществующего объекта");
         }
     }
 

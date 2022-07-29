@@ -42,7 +42,7 @@ public class FilmService {
     }
 
     public Film add(Film film) {
-        validationService.validateFilm(film);
+        validationService.validate(film);
 
         filmStorage.add(film);
         film.setGenres(genreStorage.addToFilm(film.getId(), film.getGenres()));
@@ -53,7 +53,7 @@ public class FilmService {
     }
 
     public Film update(Film film) {
-        validationService.validateFilm(film);
+        validationService.validate(film);
         validationService.checkExistsFilm(film.getId());
 
         filmStorage.update(film);
