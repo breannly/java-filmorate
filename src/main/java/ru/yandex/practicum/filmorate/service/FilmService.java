@@ -8,7 +8,10 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.entity.EventType;
 import ru.yandex.practicum.filmorate.model.entity.Film;
 import ru.yandex.practicum.filmorate.model.entity.OperationType;
-import ru.yandex.practicum.filmorate.storage.film.dao.*;
+import ru.yandex.practicum.filmorate.storage.film.dao.DirectorStorageDao;
+import ru.yandex.practicum.filmorate.storage.film.dao.FilmStorageDao;
+import ru.yandex.practicum.filmorate.storage.film.dao.GenreStorageDao;
+import ru.yandex.practicum.filmorate.storage.film.dao.MarkStorageDao;
 import ru.yandex.practicum.filmorate.storage.user.dao.EventStorageDao;
 import ru.yandex.practicum.filmorate.storage.user.dao.UserStorageDao;
 
@@ -166,7 +169,7 @@ public class FilmService {
             throw new ObjectNotFoundException("Фильм не найден");
         }
     }
-
+    
     private void checkExistsUser(Long userId) {
         if (!userStorage.existsById(userId)) {
             log.warn("Пользователь с id {} не найден", userId);
