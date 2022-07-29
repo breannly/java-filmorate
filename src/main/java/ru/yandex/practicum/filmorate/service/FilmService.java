@@ -12,7 +12,7 @@ import ru.yandex.practicum.filmorate.model.entity.OperationType;
 import ru.yandex.practicum.filmorate.storage.film.dao.DirectorStorageDao;
 import ru.yandex.practicum.filmorate.storage.film.dao.FilmStorageDao;
 import ru.yandex.practicum.filmorate.storage.film.dao.GenreStorageDao;
-import ru.yandex.practicum.filmorate.storage.film.dao.LikeStorageDao;
+import ru.yandex.practicum.filmorate.storage.film.dao.MarkStorageDao;
 import ru.yandex.practicum.filmorate.storage.user.dao.EventStorageDao;
 import ru.yandex.practicum.filmorate.storage.user.dao.UserStorageDao;
 
@@ -29,6 +29,7 @@ public class FilmService {
     private final GenreStorageDao genreStorage;
     private final EventStorageDao eventStorage;
     private final DirectorStorageDao directorStorage;
+    private final MarkStorageDao markStorage;
     private final ValidationService validationService;
 
     public List<Film> findAll() {
@@ -95,24 +96,25 @@ public class FilmService {
         return popularFilms;
     }
 
-    public void addLike(Long filmId, Long userId) {
+    public void addMark(Long filmId, Long userId, int mark) {
         validationService.checkExistsFilm(filmId);
         validationService.checkExistsUser(userId);
 
-        log.info("Пользователь {} поставил лайк фильму {}", userId, filmId);
-        likeStorage.addLike(filmId, userId);
+        log.info("Пользователь {} поставил фильму {} оценку {}", userId, filmId, mark);
+        markStorage.addMark(filmId, userId, mark);
+        markStorage.updateFilmAverageRate(filmId);
         eventStorage.add(userId, EventType.LIKE, OperationType.ADD, filmId);
     }
 
-    public void deleteLike(Long filmId, Long userId) {
+     public void deleteMark(Long filmId, Long userId) {
         validationService.checkExistsFilm(filmId);
         validationService.checkExistsUser(userId);
 
-        log.info("Пользователь {} удалил лайк у фильма {}", userId, filmId);
-        likeStorage.deleteLike(filmId, userId);
+        log.info("Пользователь {} удалил оценку у фильма {}", userId, filmId);
+        markStorage.deleteMark(filmId, userId);
+        markStorage.updateFilmAverageRate(filmId);
         eventStorage.add(userId, EventType.LIKE, OperationType.REMOVE, filmId);
     }
-
     public List<Film> findCommonFilms(Long userId, Long friendId) {
         validationService.checkExistsUser(userId);
         validationService.checkExistsUser(friendId);
