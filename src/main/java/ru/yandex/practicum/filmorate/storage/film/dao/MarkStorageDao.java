@@ -4,6 +4,4 @@ public interface MarkStorageDao {
     void addMark(Long id, Long userId, int mark);
 
     void deleteMark(Long filmId, Long userId);
-
-    void updateFilmAverageRate(Long filmId);
 }

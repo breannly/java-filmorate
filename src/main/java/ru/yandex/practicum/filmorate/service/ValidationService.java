@@ -5,8 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.entity.Film;
-import ru.yandex.practicum.filmorate.model.entity.User;
+import ru.yandex.practicum.filmorate.model.entity.*;
 import ru.yandex.practicum.filmorate.storage.film.dao.*;
 import ru.yandex.practicum.filmorate.storage.user.dao.UserStorageDao;
 
@@ -45,43 +44,37 @@ public class ValidationService {
 
     protected void checkExistsFilm(Long filmId) {
         if (!filmStorage.existsById(filmId)) {
-            log.warn("Фильм с id {} не найден", filmId);
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+            throw new ObjectNotFoundException(filmId, Film.class.getSimpleName());
         }
     }
 
     protected void checkExistsUser(Long userId) {
         if (!userStorage.existsById(userId)) {
-            log.warn("Пользователь с id {} не найден", userId);
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+            throw new ObjectNotFoundException(userId, User.class.getSimpleName());
         }
     }
 
     protected void checkExistsDirector(Long directorId) {
         if (!directorStorage.existsById(directorId)) {
-            log.warn("Режиссер с id {} не найден", directorId);
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+            throw new ObjectNotFoundException(directorId, Director.class.getSimpleName());
         }
     }
 
     protected void checkExistsReview(Long reviewId) {
         if (!reviewStorage.existsById(reviewId)) {
-            log.warn("Пользователь с id {} не найден", reviewId);
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+            throw new ObjectNotFoundException(reviewId, Review.class.getSimpleName());
         }
     }
 
     protected void checkExistsMpa(Long mpaId) {
         if (!mpaStorage.existsById(mpaId)) {
-            log.info("Mpa с id {} не найден", mpaId);
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+            throw new ObjectNotFoundException(mpaId, Mpa.class.getSimpleName());
         }
     }
 
     protected void checkExistsGenre(Long genreId) {
         if (!genreStorage.existsById(genreId)) {
-            log.warn("Жанр с id {} не найден", genreId);
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
+            throw new ObjectNotFoundException(genreId, Genre.class.getSimpleName());
         }
     }
 }

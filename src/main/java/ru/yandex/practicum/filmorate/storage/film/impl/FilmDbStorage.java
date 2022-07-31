@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -35,8 +36,6 @@ public class FilmDbStorage implements FilmStorageDao {
 
     private static final String SQL_QUERY_CHECK_FILM = "SELECT COUNT(*) FROM FILMS WHERE film_id = ?";
 
-    private static final String SQL_QUERY_ORDER_BY_RATE = "ORDER BY f.rate DESC ";
-
     private static final String SQL_QUERY_FIND_COMMON_FILMS = "SELECT f.*, m.* FROM FILMS AS f " +
             "JOIN MPA AS m ON f.mpa_id = m.mpa_id " +
             "LEFT JOIN FILM_MARKS AS fl ON f.film_id = fl.film_id " +
@@ -46,7 +45,7 @@ public class FilmDbStorage implements FilmStorageDao {
             "    INTERSECT " +
             "    SELECT film_id FROM FILM_MARKS WHERE user_id = ? " +
             ") "  +
-            SQL_QUERY_ORDER_BY_RATE;
+            "ORDER BY f.rate DESC ";
 
     private static final String SQL_QUERY_FIND_FILMS_BY_DIRECTOR_SORT_BY_LIKES = "SELECT f.*, m.* FROM FILMS AS f " +
             "JOIN MPA AS m ON f.mpa_id = m.mpa_id " +
@@ -55,7 +54,7 @@ public class FilmDbStorage implements FilmStorageDao {
             "(" +
             "    SELECT film_id FROM FILM_DIRECTORS WHERE director_id = ? " +
             ")" +
-            SQL_QUERY_ORDER_BY_RATE;
+            "ORDER BY f.rate DESC ";
 
     private static final String SQL_QUERY_FIND_FILMS_BY_DIRECTOR_SORT_BY_YEAR = "SELECT f.*, m.* FROM FILMS AS f " +
             "JOIN MPA AS m ON f.mpa_id = m.mpa_id " +
@@ -69,56 +68,61 @@ public class FilmDbStorage implements FilmStorageDao {
             "SELECT * FROM FILMS AS F " +
                     "JOIN MPA AS M ON F.MPA_ID = M.MPA_ID " +
                     "WHERE FILM_ID IN (" +
-                    "    SELECT FILM_ID" +
+                    "    SELECT TOP (1) FILM_ID" +
                     "    FROM FILM_MARKS" +
                     "    WHERE USER_ID = (" +
-                    "        SELECT F2.USER_ID FROM FILM_MARKS AS F1 " +
-                    "        JOIN FILM_MARKS AS F2 ON F2.FILM_MARK = F1.FILM_MARK AND F1.USER_ID != F2.USER_ID " +
+                    "        SELECT TOP (1) F2.USER_ID FROM FILM_MARKS AS F1 " +
+                    "        JOIN FILM_MARKS AS F2 ON F2.FILM_MARK > 5 AND F1.FILM_MARK > 5 AND F1.USER_ID != F2.USER_ID" +
                     "        WHERE F1.USER_ID = ? " +
                     "        GROUP BY F1.USER_ID, F2.USER_ID " +
                     "        ORDER BY COUNT(*) DESC )" +
                     "AND FILM_ID NOT IN (SELECT FILM_ID FROM FILM_MARKS WHERE USER_ID = ?)) AND RATE > 5";
 
-    private static final String SQL_QUERY_SEARCH_FILM = "SELECT * FROM FILMS f " +
+    private static final String SQL_QUERY_SEARCH_POPULAR_FILM = "SELECT * FROM FILMS f " +
             "JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
-            "LEFT JOIN FILM_MARKS AS FL ON FL.FILM_ID = F.FILM_ID " +
-            "LEFT JOIN FILM_DIRECTORS FD ON FD.FILM_ID = F.FILM_ID " +
-            "LEFT JOIN DIRECTORS D ON D.DIRECTOR_ID = FD.DIRECTOR_ID ";
-
-    private static final String SQL_QUERY_SEARCH_POPULAR_FILM = SQL_QUERY_SEARCH_FILM +
-            SQL_QUERY_ORDER_BY_RATE +
+            "ORDER BY f.rate DESC " +
             "LIMIT ?";
 
-    private static final String SQL_QUERY_SEARCH_BY_YEAR_AND_GENRE = SQL_QUERY_SEARCH_FILM +
+    private static final String SQL_QUERY_SEARCH_BY_YEAR_AND_GENRE = "SELECT * FROM FILMS f " +
+            "JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
             "LEFT JOIN FILM_GENRES FG ON FG.FILM_ID = F.FILM_ID " +
             "WHERE FG.GENRE_ID = ? AND YEAR(F.RELEASE_DATE) = ? " +
-            SQL_QUERY_ORDER_BY_RATE +
+            "ORDER BY f.rate DESC " +
             "LIMIT ?";
 
-    private static final String SQL_QUERY_SEARCH_BY_YEAR = SQL_QUERY_SEARCH_FILM +
+    private static final String SQL_QUERY_SEARCH_BY_YEAR = "SELECT * FROM FILMS f " +
+            "JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
             "WHERE YEAR(F.RELEASE_DATE) = ? " +
-            SQL_QUERY_ORDER_BY_RATE +
+            "ORDER BY f.rate DESC " +
             "LIMIT ?";
 
-    private static final String SQL_QUERY_SEARCH_BY_GENRE = SQL_QUERY_SEARCH_FILM +
+    private static final String SQL_QUERY_SEARCH_BY_GENRE = "SELECT * FROM FILMS f " +
+            "JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
             "LEFT JOIN FILM_GENRES FG ON FG.FILM_ID = F.FILM_ID " +
             "WHERE FG.GENRE_ID  = ? " +
-            SQL_QUERY_ORDER_BY_RATE +
+            "ORDER BY f.rate DESC " +
             "LIMIT ?";
 
-    private static final String SQL_QUERY_SEARCH_BY_TITLE = SQL_QUERY_SEARCH_FILM +
+    private static final String SQL_QUERY_SEARCH_BY_TITLE = "SELECT * FROM FILMS f " +
+            "JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
             "WHERE LOWER(f.NAME) LIKE LOWER(?)" +
-            SQL_QUERY_ORDER_BY_RATE +
+            "ORDER BY f.rate DESC " +
             "LIMIT ?";
 
-    private static final String SQL_QUERY_SEARCH_BY_DIRECTOR = SQL_QUERY_SEARCH_FILM +
+    private static final String SQL_QUERY_SEARCH_BY_DIRECTOR = "SELECT * FROM FILMS f " +
+            "JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
+            "JOIN FILM_DIRECTORS FD ON FD.FILM_ID = F.FILM_ID " +
+            "JOIN DIRECTORS D ON D.DIRECTOR_ID = FD.DIRECTOR_ID " +
             "WHERE LOWER(D.NAME) LIKE LOWER(?) " +
-            SQL_QUERY_ORDER_BY_RATE +
+            "ORDER BY f.rate DESC " +
             "LIMIT ?";
 
-    private static final String SQL_QUERY_SEARCH_BY_TITLE_AND_DIRECTOR = SQL_QUERY_SEARCH_FILM +
-            "WHERE LOWER(F.NAME) LIKE LOWER(?) OR LOWER(D.NAME) LIKE LOWER(?)" +
-            SQL_QUERY_ORDER_BY_RATE +
+    private static final String SQL_QUERY_SEARCH_BY_TITLE_AND_DIRECTOR = "SELECT * FROM FILMS f " +
+            "JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
+            "JOIN FILM_DIRECTORS FD ON FD.FILM_ID = F.FILM_ID " +
+            "JOIN DIRECTORS D ON D.DIRECTOR_ID = FD.DIRECTOR_ID " +
+            "WHERE LOWER(F.NAME) LIKE LOWER(?) OR LOWER(D.NAME) LIKE LOWER(?) " +
+            "ORDER BY f.rate DESC " +
             "LIMIT ?";
 
     @Override
@@ -127,8 +131,12 @@ public class FilmDbStorage implements FilmStorageDao {
     }
 
     @Override
-    public Film findById(Long id) {
-        return jdbcTemplate.queryForObject(SQL_QUERY_FIND_FILM_BY_ID, filmMapper, id);
+    public Optional<Film> findById(Long id) {
+        List<Film> film = jdbcTemplate.query(SQL_QUERY_FIND_FILM_BY_ID, filmMapper, id);
+        if (film.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(film.get(0));
     }
 
     @Override
@@ -162,8 +170,8 @@ public class FilmDbStorage implements FilmStorageDao {
     }
 
     @Override
-    public void deleteFilm(Long id) {
-        jdbcTemplate.update(SQL_QUERY_DELETE_FILM, id);
+    public int deleteFilm(Long id) {
+        return jdbcTemplate.update(SQL_QUERY_DELETE_FILM, id);
     }
 
     @Override

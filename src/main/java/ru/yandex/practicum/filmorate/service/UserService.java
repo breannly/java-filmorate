@@ -46,17 +46,19 @@ public class UserService {
     }
 
     public void deleteUser(Long userId) {
-        validationService.checkExistsUser(userId);
+        if (userStorage.deleteUser(userId) == 0) {
+            throw new ObjectNotFoundException(userId, User.class.getSimpleName());
+        }
 
         log.info("Удаление пользователя с id {}", userId);
-        userStorage.deleteUser(userId);
     }
 
     public User findUserById(Long userId) {
-        validationService.checkExistsUser(userId);
+        User foundUser = userStorage.findById(userId).orElseThrow(()
+                -> new ObjectNotFoundException(userId, User.class.getSimpleName()));
 
         log.info("Получение пользователя с id {}", userId);
-        return userStorage.findById(userId);
+        return foundUser;
     }
 
     public void addFriend(Long userId, Long friendId) {

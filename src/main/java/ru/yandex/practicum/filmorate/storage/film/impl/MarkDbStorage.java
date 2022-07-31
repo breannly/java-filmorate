@@ -18,15 +18,16 @@ public class MarkDbStorage implements MarkStorageDao {
     @Override
     public void addMark(Long filmId, Long userId, int mark) {
         jdbcTemplate.update(SQL_QUERY_ADD_MARK, filmId, userId, mark);
+        updateFilmAverageRate(filmId);
     }
 
     @Override
     public void deleteMark(Long filmId, Long userId) {
         jdbcTemplate.update(SQL_QUERY_DELETE_MARK, filmId, userId);
+        updateFilmAverageRate(filmId);
     }
 
-    @Override
-    public void updateFilmAverageRate(Long filmId) {
+    private void updateFilmAverageRate(Long filmId) {
         Double rate = jdbcTemplate.queryForObject(SQL_QUERY_GET_FILM_AVG_RATE, Double.class, filmId);
         jdbcTemplate.update(SQL_QUERY_UPDATE_FILM_MARK, rate, filmId);
     }

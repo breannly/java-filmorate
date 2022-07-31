@@ -3,12 +3,13 @@ package ru.yandex.practicum.filmorate.storage.film.dao;
 import ru.yandex.practicum.filmorate.model.entity.Director;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface DirectorStorageDao {
 
     List<Director> findAll();
 
-    Director findById(Long genreId);
+    Optional<Director> findById(Long genreId);
 
     List<Director> addToFilm(Long filmId, List<Director> directors);
 
@@ -20,5 +21,5 @@ public interface DirectorStorageDao {
 
     Director update(Director director);
 
-    void deleteDirector(Long directorId);
+    int deleteDirector(Long directorId);
 }

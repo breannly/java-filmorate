@@ -5,12 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.entity.EventType;
+import ru.yandex.practicum.filmorate.model.entity.Genre;
 import ru.yandex.practicum.filmorate.model.entity.OperationType;
 import ru.yandex.practicum.filmorate.model.entity.Review;
-import ru.yandex.practicum.filmorate.storage.film.dao.FilmStorageDao;
 import ru.yandex.practicum.filmorate.storage.film.dao.ReviewStorageDao;
 import ru.yandex.practicum.filmorate.storage.user.dao.EventStorageDao;
-import ru.yandex.practicum.filmorate.storage.user.dao.UserStorageDao;
 
 import java.util.List;
 
@@ -30,10 +29,10 @@ public class ReviewService {
     }
 
     public Review findById(Long reviewId) {
-        validationService.checkExistsReview(reviewId);
-
+        Review foundReview = reviewStorage.findById(reviewId).orElseThrow(() ->
+                new ObjectNotFoundException(reviewId, Genre.class.getSimpleName()));
         log.info("Получение отзыва с id {}", reviewId);
-        return reviewStorage.findById(reviewId);
+        return foundReview;
     }
 
     public Review add(Review review) {

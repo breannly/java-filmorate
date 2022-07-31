@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.entity.EventType;
 import ru.yandex.practicum.filmorate.model.entity.Film;
 import ru.yandex.practicum.filmorate.model.entity.OperationType;
@@ -13,7 +14,6 @@ import ru.yandex.practicum.filmorate.storage.film.dao.MarkStorageDao;
 import ru.yandex.practicum.filmorate.storage.user.dao.EventStorageDao;
 
 import java.util.List;
-
 
 @Slf4j
 @Service
@@ -62,16 +62,15 @@ public class FilmService {
     }
 
     public void deleteFilm(Long filmId) {
-        validationService.checkExistsFilm(filmId);
-
+        if (filmStorage.deleteFilm(filmId) == 0) {
+            throw new ObjectNotFoundException(filmId, Film.class.getSimpleName());
+        }
         log.info("Удаление фильма с id {}", filmId);
-        filmStorage.deleteFilm(filmId);
     }
 
     public Film findFilmById(Long filmId) {
-        validationService.checkExistsFilm(filmId);
-
-        Film foundFilm = filmStorage.findById(filmId);
+        Film foundFilm = filmStorage.findById(filmId).orElseThrow(() ->
+                new ObjectNotFoundException(filmId, Film.class.getSimpleName()));
         foundFilm.setGenres(genreStorage.findAllById(filmId));
         foundFilm.setDirectors(directorStorage.findAllById(filmId));
         log.info("Получение фильма с id {}", filmId);
@@ -95,7 +94,6 @@ public class FilmService {
 
         log.info("Пользователь {} поставил фильму {} оценку {}", userId, filmId, mark);
         markStorage.addMark(filmId, userId, mark);
-        markStorage.updateFilmAverageRate(filmId);
         eventStorage.add(userId, EventType.LIKE, OperationType.ADD, filmId);
     }
 
@@ -105,7 +103,6 @@ public class FilmService {
 
         log.info("Пользователь {} удалил оценку у фильма {}", userId, filmId);
         markStorage.deleteMark(filmId, userId);
-        markStorage.updateFilmAverageRate(filmId);
         eventStorage.add(userId, EventType.LIKE, OperationType.REMOVE, filmId);
     }
     public List<Film> findCommonFilms(Long userId, Long friendId) {
@@ -131,9 +128,9 @@ public class FilmService {
         validationService.checkExistsUser(userId);
 
         List<Film> recommendationsFilms = filmStorage.getRecommendations(userId);
-        recommendationsFilms.forEach(f -> {
-            f.setGenres(genreStorage.findAllById(f.getId()));
-            f.setDirectors(directorStorage.findAllById(f.getId()));
+        recommendationsFilms.forEach(film -> {
+            film.setGenres(genreStorage.findAllById(film.getId()));
+            film.setDirectors(directorStorage.findAllById(film.getId()));
         });
         return recommendationsFilms;
     }

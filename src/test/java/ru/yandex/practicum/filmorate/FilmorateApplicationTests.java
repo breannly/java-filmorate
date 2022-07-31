@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.storage.user.impl.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -33,11 +34,12 @@ class FilmorateApplicationTests {
 
     @Test
     void testFindUserById() {
-        User user = userStorage.findById(1L);
+        Optional<User> userOptional = userStorage.findById(1L);
 
-        Assertions.assertThat(user)
+        Assertions.assertThat(userOptional)
                 .isNotNull()
-                .hasFieldOrPropertyWithValue("id", 1L);
+                .hasValueSatisfying(user -> Assertions.assertThat(user)
+                        .hasFieldOrPropertyWithValue("id", 1L));
     }
 
     @Test
@@ -86,16 +88,17 @@ class FilmorateApplicationTests {
 
         Assertions.assertThat(films)
                 .isNotNull()
-                .hasSize(1);
+                .hasSize(0);
     }
 
     @Test
     void testFindFilmById() {
-        Film filmOptional = filmStorage.findById(1L);
+        Optional<Film> filmOptional = filmStorage.findById(1L);
 
         Assertions.assertThat(filmOptional)
                 .isNotNull()
-                .hasFieldOrPropertyWithValue("id", 1L);
+                .hasValueSatisfying(film -> Assertions.assertThat(film)
+                        .hasFieldOrPropertyWithValue("id", 1L));
     }
 
     @Test

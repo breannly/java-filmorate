@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.storage.film.dao.MpaStorageDao;
 import ru.yandex.practicum.filmorate.storage.mapper.MpaMapper;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -17,7 +18,7 @@ public class MpaDbStorage implements MpaStorageDao {
 
     public static final String SQL_QUERY_FIND_ALL_MPA = "SELECT * FROM MPA";
     public static final String SQL_QUERY_FIND_MPA_BY_ID = "SELECT * FROM MPA WHERE mpa_id = ?";
-    public static final String SQL_QUERY_CHECK_MPA = "SELECT COUNT(*) FROM MPA WHERE MPA_ID = ?";
+    private static final String SQL_QUERY_CHECK_MPA = "SELECT COUNT(*) FROM MPA WHERE mpa_id = ?";
 
     @Override
     public List<Mpa> findAll() {
@@ -25,8 +26,12 @@ public class MpaDbStorage implements MpaStorageDao {
     }
 
     @Override
-    public Mpa findById(Long mpaId) {
-        return jdbcTemplate.queryForObject(SQL_QUERY_FIND_MPA_BY_ID, mpaMapper, mpaId);
+    public Optional<Mpa> findById(Long mpaId) {
+        List<Mpa> mpa = jdbcTemplate.query(SQL_QUERY_FIND_MPA_BY_ID, mpaMapper, mpaId);
+        if (mpa.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(mpa.get(0));
     }
 
     @Override
