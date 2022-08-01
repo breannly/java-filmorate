@@ -16,7 +16,7 @@ public interface FilmStorageDao {
 
     Film update(Film film);
 
-    int deleteFilm(Long filmId);
+    void deleteFilm(Long filmId);
 
     boolean existsById(Long filmId);
 

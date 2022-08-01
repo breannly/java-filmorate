@@ -92,7 +92,7 @@ public class DirectorDbStorage implements DirectorStorageDao {
     }
 
     @Override
-    public int deleteDirector(Long id) {
-        return jdbcTemplate.update(SQL_QUERY_DELETE_DIRECTOR, id);
+    public void deleteDirector(Long id) {
+        jdbcTemplate.update(SQL_QUERY_DELETE_DIRECTOR, id);
     }
 }

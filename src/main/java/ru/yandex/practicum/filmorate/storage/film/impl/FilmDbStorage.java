@@ -66,17 +66,17 @@ public class FilmDbStorage implements FilmStorageDao {
 
     private static final String SQL_QUERY_GET_RECOMMENDATION =
             "SELECT * FROM FILMS AS F " +
-                    "JOIN MPA AS M ON F.MPA_ID = M.MPA_ID " +
-                    "WHERE FILM_ID IN (" +
-                    "    SELECT TOP (1) FILM_ID" +
-                    "    FROM FILM_MARKS" +
-                    "    WHERE USER_ID = (" +
-                    "        SELECT TOP (1) F2.USER_ID FROM FILM_MARKS AS F1 " +
-                    "        JOIN FILM_MARKS AS F2 ON F2.FILM_MARK > 5 AND F1.FILM_MARK > 5 AND F1.USER_ID != F2.USER_ID" +
-                    "        WHERE F1.USER_ID = ? " +
-                    "        GROUP BY F1.USER_ID, F2.USER_ID " +
-                    "        ORDER BY COUNT(*) DESC )" +
-                    "AND FILM_ID NOT IN (SELECT FILM_ID FROM FILM_MARKS WHERE USER_ID = ?)) AND RATE > 5";
+                "JOIN MPA AS M ON F.MPA_ID = M.MPA_ID " +
+                "WHERE FILM_ID IN (" +
+                "    SELECT FILM_ID" +
+                "    FROM FILM_MARKS" +
+                "    WHERE USER_ID = (" +
+                "        SELECT TOP (1) F2.USER_ID FROM FILM_MARKS AS F1 " +
+                "        JOIN FILM_MARKS AS F2 ON F2.FILM_MARK > 5 AND F1.FILM_MARK > 5 AND F1.USER_ID != F2.USER_ID" +
+                "        WHERE F1.USER_ID = ? " +
+                "        GROUP BY F1.USER_ID, F2.USER_ID " +
+                "        ORDER BY COUNT(*) DESC )" +
+                "AND FILM_ID NOT IN (SELECT FILM_ID FROM FILM_MARKS WHERE USER_ID = ?)) AND RATE > 5";
 
     private static final String SQL_QUERY_SEARCH_POPULAR_FILM = "SELECT * FROM FILMS f " +
             "JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
@@ -170,8 +170,8 @@ public class FilmDbStorage implements FilmStorageDao {
     }
 
     @Override
-    public int deleteFilm(Long id) {
-        return jdbcTemplate.update(SQL_QUERY_DELETE_FILM, id);
+    public void deleteFilm(Long id) {
+        jdbcTemplate.update(SQL_QUERY_DELETE_FILM, id);
     }
 
     @Override

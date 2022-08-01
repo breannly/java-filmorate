@@ -21,5 +21,5 @@ public interface DirectorStorageDao {
 
     Director update(Director director);
 
-    int deleteDirector(Long directorId);
+    void deleteDirector(Long directorId);
 }

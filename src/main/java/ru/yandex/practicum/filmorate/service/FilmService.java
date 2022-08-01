@@ -62,10 +62,8 @@ public class FilmService {
     }
 
     public void deleteFilm(Long filmId) {
-        if (filmStorage.deleteFilm(filmId) == 0) {
-            throw new ObjectNotFoundException(filmId, Film.class.getSimpleName());
-        }
         log.info("Удаление фильма с id {}", filmId);
+        filmStorage.deleteFilm(filmId);
     }
 
     public Film findFilmById(Long filmId) {

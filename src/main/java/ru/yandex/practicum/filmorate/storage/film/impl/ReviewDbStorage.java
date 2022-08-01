@@ -95,8 +95,8 @@ public class ReviewDbStorage implements ReviewStorageDao {
     }
 
     @Override
-    public int delete(Long reviewId) {
-        return jdbcTemplate.update(SQL_QUERY_DELETE_REVIEW, reviewId);
+    public void delete(Long reviewId) {
+        jdbcTemplate.update(SQL_QUERY_DELETE_REVIEW, reviewId);
     }
 
     @Override

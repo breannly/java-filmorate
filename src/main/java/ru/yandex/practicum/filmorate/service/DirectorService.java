@@ -43,9 +43,7 @@ public class DirectorService {
     }
 
     public void deleteDirector(Long directorId) {
-        if (directorStorage.deleteDirector(directorId) == 0) {
-            throw new ObjectNotFoundException(directorId, Director.class.getSimpleName());
-        }
         log.info("Удаление режиссера с id {}", directorId);
+        directorStorage.deleteDirector(directorId);
     }
 }

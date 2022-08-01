@@ -14,7 +14,7 @@ public interface ReviewStorageDao {
 
     Review update(Review review);
 
-    int delete(Long reviewId);
+    void delete(Long reviewId);
 
     boolean existsById(Long reviewId);
 
