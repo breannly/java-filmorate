@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.storage.film.dao.GenreStorageDao;
 import ru.yandex.practicum.filmorate.storage.mapper.GenreMapper;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -30,8 +31,12 @@ public class GenreDbStorage implements GenreStorageDao {
     }
 
     @Override
-    public Genre findById(Long genreId) {
-        return jdbcTemplate.queryForObject(SQL_QUERY_FIND_GENRE_BY_ID, genreMapper, genreId);
+    public Optional<Genre> findById(Long genreId) {
+        List<Genre> genre = jdbcTemplate.query(SQL_QUERY_FIND_GENRE_BY_ID, genreMapper, genreId);
+        if (genre.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(genre.get(0));
     }
 
     @Override

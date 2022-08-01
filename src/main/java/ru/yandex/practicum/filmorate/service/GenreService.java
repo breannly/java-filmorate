@@ -21,11 +21,9 @@ public class GenreService {
     }
 
     public Genre findGenreById(Long genreId) {
-        if (!genreStorage.existsById(genreId)) {
-            log.warn("Жанр с id {} не найден", genreId);
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        Genre foundGenre = genreStorage.findById(genreId).orElseThrow(()
+                -> new ObjectNotFoundException(genreId, Genre.class.getSimpleName()));
         log.info("Получение жанра с id {}", genreId);
-        return genreStorage.findById(genreId);
+        return foundGenre;
     }
 }

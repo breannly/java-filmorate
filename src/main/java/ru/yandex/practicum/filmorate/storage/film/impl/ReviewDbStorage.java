@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.mapper.ReviewMapper;
 import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -39,7 +40,7 @@ public class ReviewDbStorage implements ReviewStorageDao {
     private static final String SQL_QUERY_UPDATE_REVIEW = "UPDATE REVIEWS " +
             "SET content = ?, is_positive = ? WHERE REVIEW_ID = ?";
     private static final String SQL_QUERY_DELETE_REVIEW = "DELETE FROM REVIEWS WHERE REVIEW_ID = ?";
-    private static final String SQL_QUERY_CHECK_REVIEW = "SELECT COUNT(*) FROM REVIEWS WHERE REVIEW_ID = ?";
+
     private static final String SQL_QUERY_ADD_LIKE = "MERGE INTO REVIEW_REACTIONS " +
             "VALUES (?, ?, 2)";
     private static final String SQL_QUERY_ADD_DISLIKE = "MERGE INTO REVIEW_REACTIONS " +
@@ -48,21 +49,24 @@ public class ReviewDbStorage implements ReviewStorageDao {
             "WHERE REVIEW_ID = ? AND USER_ID = ?";
     private static final String SQL_QUERY_DELETE_DISLIKE = "DELETE FROM REVIEW_REACTIONS " +
             "WHERE REVIEW_ID = ? AND USER_ID = ?";
-    private static final String SQL_QUERY_CALCULATE_USEFUL = "SELECT SUM(MARK) FROM REVIEW_REACTIONS AS RR " +
-            "JOIN REACTIONS AS RE ON RR.REACTION_ID = RE.REACTION_ID " +
-            "WHERE REVIEW_ID = ? GROUP BY REVIEW_ID";
+
+    private static final String SQL_QUERY_CHECK_REVIEW = "SELECT COUNT(*) FROM REVIEWS WHERE REVIEW_ID = ?";
 
     @Override
     public List<Review> findAll(Long filmId, int count) {
-        if (filmId == 0) {
+        if (filmId == null) {
             return jdbcTemplate.query(SQL_QUERY_FIND_ALL_REVIEWS, reviewMapper, count);
         }
         return jdbcTemplate.query(SQL_QUERY_FIND_ALL_REVIEWS_BY_FILM, reviewMapper, filmId, count);
     }
 
     @Override
-    public Review findById(Long reviewId) {
-        return jdbcTemplate.queryForObject(SQL_QUERY_FIND_REVIEW_BY_ID, reviewMapper, reviewId);
+    public Optional<Review> findById(Long reviewId) {
+        List<Review> review = jdbcTemplate.query(SQL_QUERY_FIND_REVIEW_BY_ID, reviewMapper, reviewId);
+        if (review.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(review.get(0));
     }
 
     @Override

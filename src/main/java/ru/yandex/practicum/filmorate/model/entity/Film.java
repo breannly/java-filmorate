@@ -2,10 +2,7 @@ package ru.yandex.practicum.filmorate.model.entity;
 
 import lombok.*;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -26,6 +23,9 @@ public class Film extends IdEntity {
 
     @Positive(message = "Продолжительность фильма должна быть положительной")
     private long duration;
+
+    @Min(1) @Max(10)
+    private Double rate;
 
     @NotNull
     private Mpa mpa;
