@@ -1,0 +1,7 @@
+package ru.yandex.practicum.filmorate.storage.film.dao;
+
+public interface MarkStorageDao {
+    void addMark(Long id, Long userId, int mark);
+
+    void deleteMark(Long filmId, Long userId);
+}

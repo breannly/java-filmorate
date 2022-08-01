@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.mapper.DirectorMapper;
 import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -40,8 +41,12 @@ public class DirectorDbStorage implements DirectorStorageDao {
     }
 
     @Override
-    public Director findById(Long directorId) {
-        return jdbcTemplate.queryForObject(SQL_QUERY_FIND_DIRECTOR_BY_ID, directorMapper, directorId);
+    public Optional<Director> findById(Long directorId) {
+        List<Director> director = jdbcTemplate.query(SQL_QUERY_FIND_DIRECTOR_BY_ID, directorMapper, directorId);
+        if (director.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(director.get(0));
     }
 
     @Override

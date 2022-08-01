@@ -20,8 +20,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
     private final UserStorageDao userStorage;
-    private final FriendStorageDao friendStorage;
     private final EventStorageDao eventStorage;
+    private final FriendStorageDao friendStorage;
+    private final ValidationService validationService;
 
     public Collection<User> findAll() {
         log.info("Получение списка всех пользователей");
@@ -29,7 +30,7 @@ public class UserService {
     }
 
     public User add(User user) {
-        validate(user);
+        validationService.validate(user);
         User addedUser = userStorage.add(user);
         log.info("Добавление нового пользователя с id {}", addedUser.getId());
 
@@ -37,39 +38,29 @@ public class UserService {
     }
 
     public User update(User user) {
-        checkExistsUser(user.getId());
+        validationService.checkExistsUser(user.getId());
+        validationService.validate(user);
 
-        validate(user);
         log.info("Обновление пользователя с id {}", user.getId());
         return userStorage.update(user);
     }
 
     public void deleteUser(Long userId) {
-        checkExistsUser(userId);
-
         log.info("Удаление пользователя с id {}", userId);
         userStorage.deleteUser(userId);
     }
 
-    private void validate(User user) {
-        boolean isWrongName = user.getName().isBlank();
-
-        if (isWrongName) {
-            log.warn("У пользователя {} user изменено имя на {}", user, user.getLogin());
-            user.setName(user.getLogin());
-        }
-    }
-
     public User findUserById(Long userId) {
-        checkExistsUser(userId);
+        User foundUser = userStorage.findById(userId).orElseThrow(()
+                -> new ObjectNotFoundException(userId, User.class.getSimpleName()));
 
         log.info("Получение пользователя с id {}", userId);
-        return userStorage.findById(userId);
+        return foundUser;
     }
 
     public void addFriend(Long userId, Long friendId) {
-        checkExistsUser(userId);
-        checkExistsUser(friendId);
+        validationService.checkExistsUser(userId);
+        validationService.checkExistsUser(friendId);
 
         log.info("Пользователь {} добавил {}", userId, friendId);
         eventStorage.add(userId, EventType.FRIEND, OperationType.ADD, friendId);
@@ -77,8 +68,8 @@ public class UserService {
     }
 
     public void deleteFriend(Long userId, Long friendId) {
-        checkExistsUser(userId);
-        checkExistsUser(friendId);
+        validationService.checkExistsUser(userId);
+        validationService.checkExistsUser(friendId);
 
         log.info("Пользователь {} удалил {}", userId, friendId);
         eventStorage.add(userId, EventType.FRIEND, OperationType.REMOVE, friendId);
@@ -86,31 +77,25 @@ public class UserService {
     }
 
     public List<User> findFriends(Long userId) {
-        checkExistsUser(userId);
+        validationService.checkExistsUser(userId);
 
         log.info("Получение друзей пользователя с id {}", userId);
         return friendStorage.findFriends(userId);
     }
 
     public List<User> findMutualFriends(Long userId, Long otherId) {
-        checkExistsUser(userId);
-        checkExistsUser(otherId);
+        validationService.checkExistsUser(userId);
+        validationService.checkExistsUser(otherId);
 
         log.info("Получение общих друзей пользователей с id {} и {}", userId, otherId);
         return friendStorage.findMutualFriends(userId, otherId);
     }
 
     public List<Event> getFeed(Long userId) {
-        checkExistsUser(userId);
+        validationService.checkExistsUser(userId);
 
         log.info("Получение ленты пользователя с id {}", userId);
         return userStorage.getFeed(userId);
     }
 
-    private void checkExistsUser(Long userId) {
-        if (!userStorage.existsById(userId)) {
-            log.warn("Пользователь с id {} не найден", userId);
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
-    }
 }

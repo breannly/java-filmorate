@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.storage.user.dao.UserStorageDao;
 import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -38,8 +39,12 @@ public class UserDbStorage implements UserStorageDao {
     }
 
     @Override
-    public User findById(Long id) {
-        return jdbcTemplate.queryForObject(SQL_QUERY_FIND_USER_BY_ID, userMapper, id);
+    public Optional<User> findById(Long id) {
+        List<User> user = jdbcTemplate.query(SQL_QUERY_FIND_USER_BY_ID, userMapper, id);
+        if (user.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(user.get(0));
     }
 
     @Override
@@ -70,8 +75,8 @@ public class UserDbStorage implements UserStorageDao {
     }
 
     @Override
-    public void deleteUser(Long id) {
-        jdbcTemplate.update(SQL_QUERY_DELETE_USER, id);
+    public int deleteUser(Long id) {
+        return jdbcTemplate.update(SQL_QUERY_DELETE_USER, id);
     }
 
     @Override

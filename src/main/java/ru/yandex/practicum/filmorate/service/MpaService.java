@@ -21,11 +21,10 @@ public class MpaService {
     }
 
     public Mpa findMpaById(Long mpaId) {
-        if (!mpaStorage.existsById(mpaId)) {
-            log.info("Mpa с id {} не найден", mpaId);
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
+        Mpa foundMpa = mpaStorage.findById(mpaId).orElseThrow(()
+                -> new ObjectNotFoundException(mpaId, Mpa.class.getSimpleName()));
+
         log.info("Получение mpa c id {}", mpaId);
-        return mpaStorage.findById(mpaId);
+        return foundMpa;
     }
 }

@@ -14,43 +14,36 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DirectorService {
     private final DirectorStorageDao directorStorage;
+    private final ValidationService validationService;
 
     public List<Director> findAll() {
-        log.info("Получение списка всех жанров");
+        log.info("Получение списка всех режиссеров");
         return directorStorage.findAll();
     }
 
     public Director findById(Long directorId) {
-        checkExistsDirector(directorId);
+        Director foundDirector = directorStorage.findById(directorId).orElseThrow(()
+                -> new ObjectNotFoundException(directorId, Director.class.getSimpleName()));
 
-        log.info("Получение жанра с id {}", directorId);
-        return directorStorage.findById(directorId);
+        log.info("Получение режиссера с id {}", directorId);
+        return foundDirector;
     }
 
     public Director add(Director director) {
         Director addedDirector = directorStorage.add(director);
-        log.info("Добавление нового режиссетра с id {}", addedDirector.getId());
+        log.info("Добавление нового режиссера с id {}", addedDirector.getId());
         return addedDirector;
     }
 
     public Director update(Director director) {
-        checkExistsDirector(director.getId());
+        validationService.checkExistsDirector(director.getId());
 
         log.info("Обновление режиссера с id {}", director.getId());
         return directorStorage.update(director);
     }
 
     public void deleteDirector(Long directorId) {
-        checkExistsDirector(directorId);
-
         log.info("Удаление режиссера с id {}", directorId);
         directorStorage.deleteDirector(directorId);
-    }
-
-    private void checkExistsDirector(Long directorId) {
-        if (!directorStorage.existsById(directorId)) {
-            log.warn("Режиссер с id {} не найден", directorId);
-            throw new ObjectNotFoundException("Вызов несуществующего объекта");
-        }
     }
 }
