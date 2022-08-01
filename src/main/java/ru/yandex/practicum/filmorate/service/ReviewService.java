@@ -22,7 +22,7 @@ public class ReviewService {
     private final ValidationService validationService;
 
     public List<Review> findAll(Long filmId, int count) {
-        if (filmId != 0 ) validationService.checkExistsFilm(filmId);
+        if (filmId != null) validationService.checkExistsFilm(filmId);
 
         log.info("Получение отзывов по фильму {}", filmId);
         return reviewStorage.findAll(filmId, count);

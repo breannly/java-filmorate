@@ -53,7 +53,7 @@ public class ReviewDbStorage implements ReviewStorageDao {
 
     @Override
     public List<Review> findAll(Long filmId, int count) {
-        if (filmId == 0) {
+        if (filmId == null) {
             return jdbcTemplate.query(SQL_QUERY_FIND_ALL_REVIEWS, reviewMapper, count);
         }
         return jdbcTemplate.query(SQL_QUERY_FIND_ALL_REVIEWS_BY_FILM, reviewMapper, filmId, count);
