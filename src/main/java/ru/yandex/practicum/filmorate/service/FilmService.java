@@ -103,6 +103,7 @@ public class FilmService {
         markStorage.deleteMark(filmId, userId);
         eventStorage.add(userId, EventType.LIKE, OperationType.REMOVE, filmId);
     }
+    
     public List<Film> findCommonFilms(Long userId, Long friendId) {
         validationService.checkExistsUser(userId);
         validationService.checkExistsUser(friendId);

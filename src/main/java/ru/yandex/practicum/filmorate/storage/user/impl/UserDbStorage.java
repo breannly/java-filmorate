@@ -75,8 +75,8 @@ public class UserDbStorage implements UserStorageDao {
     }
 
     @Override
-    public int deleteUser(Long id) {
-        return jdbcTemplate.update(SQL_QUERY_DELETE_USER, id);
+    public void deleteUser(Long id) {
+        jdbcTemplate.update(SQL_QUERY_DELETE_USER, id);
     }
 
     @Override

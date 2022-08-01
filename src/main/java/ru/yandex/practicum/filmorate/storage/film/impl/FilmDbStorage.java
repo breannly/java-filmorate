@@ -2,9 +2,12 @@ package ru.yandex.practicum.filmorate.storage.film.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.config.FilmSearchStrategy;
 import ru.yandex.practicum.filmorate.model.entity.Film;
 import ru.yandex.practicum.filmorate.storage.film.dao.FilmStorageDao;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
@@ -14,11 +17,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static ru.yandex.practicum.filmorate.config.FilmSearchStrategy.*;
+
 @Repository
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorageDao {
     private final JdbcTemplate jdbcTemplate;
     private final FilmMapper filmMapper;
+    private final NamedParameterJdbcTemplate namedParameter;
 
     private static final String SQL_QUERY_FIND_ALL_FILMS = "SELECT * FROM FILMS AS ff " +
             "JOIN MPA AS m ON ff.mpa_id = m.mpa_id";
@@ -55,6 +61,7 @@ public class FilmDbStorage implements FilmStorageDao {
             "    SELECT film_id FROM FILM_DIRECTORS WHERE director_id = ? " +
             ")" +
             "ORDER BY f.rate DESC ";
+
 
     private static final String SQL_QUERY_FIND_FILMS_BY_DIRECTOR_SORT_BY_YEAR = "SELECT f.*, m.* FROM FILMS AS f " +
             "JOIN MPA AS m ON f.mpa_id = m.mpa_id " +
@@ -131,6 +138,7 @@ public class FilmDbStorage implements FilmStorageDao {
     }
 
     @Override
+
     public Optional<Film> findById(Long id) {
         List<Film> film = jdbcTemplate.query(SQL_QUERY_FIND_FILM_BY_ID, filmMapper, id);
         if (film.isEmpty()) {

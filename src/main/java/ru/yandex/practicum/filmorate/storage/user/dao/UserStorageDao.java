@@ -15,7 +15,7 @@ public interface UserStorageDao {
 
     User update(User user);
 
-    int deleteUser(Long userId);
+    void deleteUser(Long userId);
 
     boolean existsById(Long userId);
 

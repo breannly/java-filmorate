@@ -97,5 +97,4 @@ public class UserService {
         log.info("Получение ленты пользователя с id {}", userId);
         return userStorage.getFeed(userId);
     }
-
 }

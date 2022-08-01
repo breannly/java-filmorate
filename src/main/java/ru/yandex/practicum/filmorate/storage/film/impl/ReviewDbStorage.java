@@ -40,6 +40,7 @@ public class ReviewDbStorage implements ReviewStorageDao {
     private static final String SQL_QUERY_UPDATE_REVIEW = "UPDATE REVIEWS " +
             "SET content = ?, is_positive = ? WHERE REVIEW_ID = ?";
     private static final String SQL_QUERY_DELETE_REVIEW = "DELETE FROM REVIEWS WHERE REVIEW_ID = ?";
+
     private static final String SQL_QUERY_ADD_LIKE = "MERGE INTO REVIEW_REACTIONS " +
             "VALUES (?, ?, 2)";
     private static final String SQL_QUERY_ADD_DISLIKE = "MERGE INTO REVIEW_REACTIONS " +

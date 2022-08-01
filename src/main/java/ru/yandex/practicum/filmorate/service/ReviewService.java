@@ -94,5 +94,4 @@ public class ReviewService {
         log.info("Пользователь {} удалил дизлайк у отзыва {}", reviewId, userId);
         reviewStorage.deleteDislike(reviewId, userId);
     }
-
 }
